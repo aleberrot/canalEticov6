@@ -98,7 +98,7 @@ export interface EmpresaPublicResponse {
 }
 
 export interface EstadisticasEmpresaResponse {
-  totalDenuncias: number;
+  total: number;
   generales: number;
   leyKarin: number;
   recibidas: number;

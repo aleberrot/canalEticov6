@@ -17,7 +17,7 @@ import {
 } from '../services/api';
 
 const EMPTY_STATISTICS: EstadisticasEmpresaResponse = {
-  totalDenuncias: 0,
+  total: 0,
   generales: 0,
   leyKarin: 0,
   recibidas: 0,
@@ -29,7 +29,7 @@ const STATISTICS: Array<{
   key: keyof EstadisticasEmpresaResponse;
   label: string;
 }> = [
-  { key: 'totalDenuncias', label: 'Total' },
+  { key: 'total', label: 'Total' },
   { key: 'generales', label: 'Denuncias generales' },
   { key: 'leyKarin', label: 'Ley Karin' },
   { key: 'recibidas', label: 'Recibidas' },
