@@ -101,6 +101,7 @@ export interface EstadisticasEmpresaResponse {
   totalDenuncias: number;
   generales: number;
   leyKarin: number;
+  recibidas: number;
   enRevision: number;
   cerradas: number;
 }

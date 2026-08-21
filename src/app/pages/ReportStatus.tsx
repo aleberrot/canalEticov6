@@ -1,57 +1,101 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate, useLocation } from 'react-router';
-import { ArrowLeft, FileText, Calendar, AlertCircle, Loader2 } from 'lucide-react';
-import { consultarDenuncia, Report as ApiReport } from '../services/api';
+import {
+  AlertCircle,
+  ArrowLeft,
+  Calendar,
+  FileText,
+  Loader2,
+  Upload,
+} from 'lucide-react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router';
+import {
+  agregarInformacionAdicional,
+  consultarDenuncia,
+  SeguimientoDenunciaResponse,
+} from '../services/api';
+
+interface TrackingLocationState {
+  password?: string;
+}
 
 export function ReportStatus() {
   const { code } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const [report, setReport] = useState<ApiReport | null>(null);
+  const password = (location.state as TrackingLocationState | null)?.password;
+  const [report, setReport] =
+    useState<SeguimientoDenunciaResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  const [additionalInfo, setAdditionalInfo] = useState('');
+  const [additionalFile, setAdditionalFile] = useState<File | null>(null);
+  const [sendingAdditional, setSendingAdditional] = useState(false);
+  const [additionalFeedback, setAdditionalFeedback] = useState('');
 
   useEffect(() => {
+    if (!code || !password) {
+      navigate('/tracking', { replace: true });
+      return;
+    }
+
     const fetchReport = async () => {
-      if (!code) {
-        navigate('/tracking');
-        return;
-      }
-
-      // Get password from location state (passed from Tracking component)
-      const password = (location.state as any)?.password;
-      if (!password) {
-        navigate('/tracking');
-        return;
-      }
-
       try {
         setLoading(true);
-        setError(null);
-
-        const reportData = await consultarDenuncia({code,password});
-
-        setReport(reportData);
-      } catch (err) {
-        console.error('Error fetching report:', err);
+        setError('');
+        setReport(await consultarDenuncia({ code, password }));
+      } catch (requestError) {
         setError(
-          err instanceof Error
-            ? err.message
-            : 'No se pudo cargar la información de la denuncia.'
+          requestError instanceof Error
+            ? requestError.message
+            : 'No se pudo cargar la información de la denuncia.',
         );
       } finally {
         setLoading(false);
       }
     };
 
-    fetchReport();
-  }, [code, navigate, location.state]);
+    void fetchReport();
+  }, [code, navigate, password]);
+
+  const sendAdditionalInformation = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!code || !password || (!additionalInfo.trim() && !additionalFile)) {
+      setAdditionalFeedback(
+        'Escribe información o selecciona un documento para continuar.',
+      );
+      return;
+    }
+
+    try {
+      setSendingAdditional(true);
+      setAdditionalFeedback('');
+      const updatedReport = await agregarInformacionAdicional(
+        code,
+        password,
+        additionalInfo.trim() || undefined,
+        additionalFile,
+      );
+      setReport(updatedReport);
+      setAdditionalInfo('');
+      setAdditionalFile(null);
+      setAdditionalFeedback('Información adicional enviada correctamente.');
+    } catch (requestError) {
+      setAdditionalFeedback(
+        requestError instanceof Error
+          ? requestError.message
+          : 'No fue posible enviar la información adicional.',
+      );
+    } finally {
+      setSendingAdditional(false);
+    }
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-secondary to-white py-12 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-secondary to-white py-12">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
+          <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-primary" />
           <p className="text-muted-foreground">Cargando información...</p>
         </div>
       </div>
@@ -61,20 +105,20 @@ export function ReportStatus() {
   if (error || !report) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-secondary to-white py-12">
-        <div className="container mx-auto px-4 max-w-2xl">
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 flex items-start gap-3 mb-6">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+        <div className="container mx-auto max-w-2xl px-4">
+          <div className="rounded-lg bg-white p-8 shadow-lg">
+            <div className="mb-6 flex items-start gap-3 rounded-lg border-2 border-red-200 bg-red-50 p-4">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
               <div>
-                <p className="text-red-800 font-medium">Error</p>
-                <p className="text-red-700 text-sm mt-1">
+                <p className="font-medium text-red-800">Error</p>
+                <p className="mt-1 text-sm text-red-700">
                   {error || 'No se pudo cargar la información de la denuncia.'}
                 </p>
               </div>
             </div>
             <Link
               to="/tracking"
-              className="block w-full text-center bg-primary text-primary-foreground py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors"
+              className="block w-full rounded-lg bg-primary px-6 py-3 text-center text-primary-foreground"
             >
               Volver a consulta
             </Link>
@@ -84,121 +128,168 @@ export function ReportStatus() {
     );
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'RECIBIDA':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'EN_REVISION':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'CERRADA':
-        return 'bg-green-100 text-green-800 border-green-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
- console.log(report)
   return (
     <div className="min-h-screen bg-gradient-to-b from-secondary to-white py-12">
-      <div className="container mx-auto px-4 max-w-3xl">
-        <Link 
+      <div className="container mx-auto max-w-3xl px-4">
+        <Link
           to="/tracking"
-          className="inline-flex items-center gap-2 text-primary hover:underline mb-8"
+          className="mb-8 inline-flex items-center gap-2 text-primary hover:underline"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Volver a consulta
+          <ArrowLeft className="h-4 w-4" /> Volver a consulta
         </Link>
-        
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <div className="flex items-start justify-between mb-6 pb-6 border-b border-border">
+        <div className="rounded-lg bg-white p-8 shadow-lg">
+          <header className="mb-6 flex items-start justify-between border-b border-border pb-6">
             <div>
-              <h1 className="text-primary mb-2">Estado de Denuncia</h1>
-              <p className="text-muted-foreground">Código: {report.codigoUnico}</p>
+              <h1 className="mb-2 text-primary">Estado de Denuncia</h1>
+              <p className="text-muted-foreground">
+                Código: {report.codigoUnico}
+              </p>
             </div>
-            
-            <span className={`px-4 py-2 rounded-full border ${getStatusColor(report.estado)}`}>
+            <span
+              className={`rounded-full border px-4 py-2 ${getStatusColor(report.estado)}`}
+            >
               {report.estado}
             </span>
-          </div>
-          
+          </header>
           <div className="space-y-6">
-            <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-primary mt-1" />
-              <div>
-                <p className="text-sm text-muted-foreground">Fecha de creación</p>
-                <p className="text-foreground">
-                  {new Date(report.createdAt).toLocaleDateString('es-ES', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <FileText className="w-5 h-5 text-primary mt-1" />
-              <div>
-                <p className="text-sm text-muted-foreground">Tipo de denuncia</p>
-                <p className="text-foreground">{report.tipoDenuncia}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-primary mt-1" />
-              <div>
-                <p className="text-sm text-muted-foreground">Fecha del incidente</p>
-                <p className="text-foreground">
-                  {report.fechaIncidente}
-                </p>
-              </div>
-            </div>
-            
-            <div className="pt-6 border-t border-border">
-              <p className="text-sm text-muted-foreground mb-3">Descripción enviada</p>
-              <div className="bg-secondary p-4 rounded-lg">
-                <p className="text-foreground whitespace-pre-wrap">{report.descripcion}</p>
-              </div>
-            </div>
-            
-            {report.involved && (
-              <div className="pt-6 border-t border-border">
-                <p className="text-sm text-muted-foreground mb-3">Personas involucradas</p>
-                <div className="bg-secondary p-4 rounded-lg">
-                  <p className="text-foreground">{report.involved}</p>
-                </div>
-              </div>
+            <InfoRow
+              icon={<Calendar className="mt-1 h-5 w-5 text-primary" />}
+              label="Fecha de creación"
+              value={new Date(report.createdAt).toLocaleDateString('es-CL', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            />
+            <InfoRow
+              icon={<FileText className="mt-1 h-5 w-5 text-primary" />}
+              label="Tipo de denuncia"
+              value={report.tipoDenuncia}
+            />
+            <ContentBlock title="Descripción enviada" content={report.descripcion} />
+            {report.informacionAdicional && (
+              <ContentBlock
+                title="Información adicional"
+                content={report.informacionAdicional}
+              />
             )}
-            
-            {report.fileName && (
-              <div className="pt-6 border-t border-border">
-                <p className="text-sm text-muted-foreground mb-3">Archivo adjunto</p>
-                <div className="bg-secondary p-4 rounded-lg">
-                  <p className="text-foreground">{report.fileName}</p>
-                </div>
-              </div>
+            {report.conclusionesMedidas && (
+              <ContentBlock
+                title="Conclusiones y medidas tomadas"
+                content={report.conclusionesMedidas}
+                emphasized
+              />
             )}
           </div>
-          
-          <div className="mt-8 p-4 bg-accent border border-primary/20 rounded-lg">
-            <p className="text-sm text-primary">
-              <strong>Información:</strong> Tu denuncia está siendo procesada. 
-              Recibirás actualizaciones sobre el estado de tu caso. 
-              Puedes consultar el estado en cualquier momento con tu código y contraseña.
-            </p>
-          </div>
-          
-          <div className="mt-8">
-            <Link 
-              to="/"
-              className="block w-full text-center bg-white text-primary py-3 px-6 rounded-lg border-2 border-primary hover:bg-secondary transition-colors"
+          {report.tipoDenuncia === 'GENERAL' && (
+            <form
+              onSubmit={sendAdditionalInformation}
+              className="mt-8 space-y-4 border-t border-border pt-8"
             >
-              Volver al inicio
-            </Link>
-          </div>
+              <div>
+                <h2 className="text-primary">Agregar información</h2>
+                <p className="text-sm text-muted-foreground">
+                  Puedes complementar tu denuncia con antecedentes o documentos.
+                </p>
+              </div>
+              <label className="block">
+                Información adicional
+                <textarea
+                  rows={5}
+                  value={additionalInfo}
+                  onChange={(event) => setAdditionalInfo(event.target.value)}
+                  className="mt-1 w-full rounded-lg border border-border bg-input-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </label>
+              <label className="block cursor-pointer rounded-lg border-2 border-dashed border-primary/40 bg-secondary/50 p-5 text-center">
+                <Upload className="mx-auto mb-2 h-6 w-6 text-primary" />
+                <span className="block font-medium text-primary">
+                  Adjuntar documento adicional
+                </span>
+                <span className="mt-1 block text-sm text-muted-foreground">
+                  {additionalFile?.name ?? 'Seleccionar archivo'}
+                </span>
+                <input
+                  type="file"
+                  onChange={(event) =>
+                    setAdditionalFile(event.target.files?.[0] ?? null)
+                  }
+                  className="sr-only"
+                />
+              </label>
+              {additionalFeedback && (
+                <p className="rounded-lg bg-secondary p-3 text-sm">
+                  {additionalFeedback}
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={sendingAdditional}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 text-primary-foreground disabled:opacity-60"
+              >
+                {sendingAdditional && (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                )}
+                Enviar información adicional
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+function getStatusColor(status: string) {
+  switch (status) {
+    case 'RECIBIDA':
+      return 'bg-blue-100 text-blue-800 border-blue-200';
+    case 'EN_REVISION':
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'CERRADA':
+      return 'bg-green-100 text-green-800 border-green-200';
+    default:
+      return 'bg-gray-100 text-gray-800 border-gray-200';
+  }
+}
+
+interface InfoRowProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}
+
+function InfoRow({ icon, label, value }: InfoRowProps) {
+  return (
+    <div className="flex items-start gap-3">
+      {icon}
+      <div>
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p>{value}</p>
+      </div>
+    </div>
+  );
+}
+
+interface ContentBlockProps {
+  title: string;
+  content: string;
+  emphasized?: boolean;
+}
+
+function ContentBlock({ title, content, emphasized }: ContentBlockProps) {
+  return (
+    <section className="border-t border-border pt-6">
+      <h2 className="mb-3 text-lg text-primary">{title}</h2>
+      <div
+        className={`rounded-lg p-5 ${
+          emphasized ? 'border border-primary/30 bg-accent' : 'bg-secondary'
+        }`}
+      >
+        <p className="whitespace-pre-wrap">{content}</p>
+      </div>
+    </section>
   );
 }

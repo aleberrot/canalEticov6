@@ -7,7 +7,7 @@ export interface DelitoOption{
 export const DELITOS: DelitoOption[] = [
     {
         codigo: "DEL-001",
-        tipificacion: "Cohecho a funcionario público nacional o extranjero",
+        tipificacion: "Cohecho a funcionario ublico nacional o extranjero ",
         descripcion:
         "Comete este delito quien ofrece o consiente en ofrecer o entregar a un empleado público un beneficio económico, en provecho de éste o de un tercero, para que realice acciones u omisiones con infracción a los deberes de su cargo.",
     },
@@ -25,9 +25,9 @@ export const DELITOS: DelitoOption[] = [
     },
     {
         codigo: "DEL-004",
-        tipificacion: "Receptación",
+        tipificacion: "Receptacion",
         descripcion:
-        "El delito lo comete quien tiene en su poder cosas robadas o hurtadas sabiendo su origen ilícito, o quien compra o vende cosas robadas o hurtadas.",
+        "El delito lo comete quien tiene en su poder cosas robadas o hurtadas sabiendo su origen ilícito, o quien compra o vende cosas robadas o hurtadas. ",
     },
         {
         codigo: "DEL-005",
@@ -53,7 +53,7 @@ export const DELITOS: DelitoOption[] = [
   {
     codigo: "DEL-009",
     tipificacion: "Relación con proveedores",
-    descripcion: "La selección de proveedores debe basarse en criterios técnico-económicos pensado en el mejor interés de la empresa. Cualquier situación que pueda interpretarse como irregular en este sentido, es materia de denuncia.",
+    descripcion: "La selección de proveedores debe basarse en criterios técnico-económicos pensado en el mejor interés de la empresa. Cualquier situación que pueda interpretarse como irregular en este sentido, es materia de denuncia. ",
   },
   {
     codigo: "DEL-010",
@@ -83,7 +83,7 @@ export const DELITOS: DelitoOption[] = [
   {
     codigo: "DEL-015",
     tipificacion: "Fraude",
-    descripcion: "Esta falta se refiere a la materialización o intención de defraudar a la compañía ya sea que sea por algún colaborador de la empresa o por alguien externo (cliente o proveedor) o entre ambos.  Por lo general se trata de obtener pagos por servicios no otorgados o realizado para fines personales de los defraudadores.",
+    descripcion: "Esta falta se refiere a la materialización o intención de defraudar a la compañía ya sea que sea por algún colaborador de la empresa o por alguien externo (cliente o proveedor) o entre ambos.  Por lo general se trata de obtener pagos por servicios no otorgados o realizado para fines personales de los defraudadores. ",
   },
   {
     codigo: "DEL-016",
@@ -197,7 +197,7 @@ export const DELITOS: DelitoOption[] = [
   },
   {
     codigo: "DEL-038",
-    tipificacion: "Igualdad",
+    tipificacion: "Igualdad ",
     descripcion: "La igualdad es el principio que reconoce que todas las personas tienen los mismos derechos y obligaciones, y que deben ser tratadas de manera idéntica sin importar su raza, sexo, clase social, creencias religiosas, discapacidades, o cualquier otra circunstancia que pueda generar diferencias.",
   },
   {
@@ -232,8 +232,46 @@ export const DELITOS: DelitoOption[] = [
   },
 ] as const;
 
+const ACOSO_SEXUAL_LEY_KARIN: DelitoOption = {
+  codigo: "DEL-045",
+  tipificacion: "Acoso Sexual",
+  descripcion:
+    "Requerimientos de carácter sexual no consentidos que provoquen amenaza, ofensa, humillación o un ambiente intimidatorio, hostil u ofensivo.",
+};
+
+const TIPIFICACIONES_LEY_KARIN = [
+  "Acoso Laboral",
+  "Acoso Sexual",
+  "Violencia en el trabajo",
+  "Discriminación",
+] as const;
+
+export const DELITOS_LEY_KARIN = TIPIFICACIONES_LEY_KARIN.map(
+  (tipificacion) => {
+    if (tipificacion === ACOSO_SEXUAL_LEY_KARIN.tipificacion) {
+      return ACOSO_SEXUAL_LEY_KARIN;
+    }
+
+    const delito = DELITOS.find(
+      (option) =>
+        option.tipificacion.toLocaleLowerCase("es") ===
+        tipificacion.toLocaleLowerCase("es"),
+    );
+
+    if (!delito) {
+      throw new Error(`Tipificación Ley Karin no encontrada: ${tipificacion}`);
+    }
+
+    return delito;
+  },
+);
+
 export const obtenerDelitoPorCodigo = (codigo: string): DelitoOption | undefined =>
-  DELITOS.find((delito) => delito.codigo === codigo);
+  [...DELITOS, ...DELITOS_LEY_KARIN].find(
+    (delito) => delito.codigo === codigo,
+  );
 
 export const obtenerDelitoPorTipificacion = (tipificacion: string): DelitoOption | undefined =>
-  DELITOS.find((delito) => delito.tipificacion === tipificacion);
+  [...DELITOS, ...DELITOS_LEY_KARIN].find(
+    (delito) => delito.tipificacion === tipificacion,
+  );

@@ -1,13 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   AlertCircle,
   ArrowLeft,
   CheckCircle,
+  Eye,
+  EyeOff,
   Loader2,
+  Upload,
 } from 'lucide-react';
 import { Link } from 'react-router';
 import { SimpleCaptcha } from '../components/SimpleCaptcha';
-import { DELITOS, obtenerDelitoPorCodigo } from '../data/delitos';
+import {
+  DELITOS,
+  DELITOS_LEY_KARIN,
+  obtenerDelitoPorCodigo,
+} from '../data/delitos';
 import {
   EMPTY_REPORT_DRAFT,
   ReportDraft,
@@ -32,15 +39,32 @@ const RELATIONSHIPS: RelacionEmpresa[] = [
   'OTRO',
 ];
 
+
 export function SubmitReport() {
+
   const { empresa, reportDraft, setReportDraft } = usePublicChannel();
   const [captcha, setCaptcha] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [codigo, setCodigo] = useState('');
   const delito = obtenerDelitoPorCodigo(reportDraft.delitoCodigo);
   const isLeyKarin = reportDraft.tipoDenuncia === 'LEY_KARIN';
+  const availableDelitos = isLeyKarin ? DELITOS_LEY_KARIN : DELITOS;
   const channelBase = `/canal/${empresa.codigo}`;
+
+  useEffect(() => {
+    const selectedIsAvailable = availableDelitos.some(
+      (option) => option.codigo === reportDraft.delitoCodigo,
+    );
+
+    if (reportDraft.delitoCodigo && !selectedIsAvailable) {
+      setReportDraft((currentDraft) => ({
+        ...currentDraft,
+        delitoCodigo: '',
+      }));
+    }
+  }, [availableDelitos, reportDraft.delitoCodigo, setReportDraft]);
 
   const updateField = <Key extends keyof ReportDraft>(
     field: Key,
@@ -234,7 +258,7 @@ export function SubmitReport() {
                 className={INPUT_CLASS}
               >
                 <option value="">Selecciona una tipificación</option>
-                {DELITOS.map((option) => (
+                {availableDelitos.map((option) => (
                   <option key={option.codigo} value={option.codigo}>
                     {option.tipificacion}
                   </option>
@@ -306,23 +330,55 @@ export function SubmitReport() {
               </div>
             </div>
             <label className="block">
-              Adjuntar archivo
-              <input
-                type="file"
-                onChange={(event) =>
-                  updateField('archivo', event.target.files?.[0] ?? null)
-                }
-                className="mt-2 block"
-              />
+              <span className="mb-2 block">Documentación de respaldo</span>
+              <span className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-primary/40 bg-secondary/50 p-6 text-center hover:border-primary">
+                <Upload className="h-7 w-7 text-primary" />
+                <span className="font-medium text-primary">
+                  Adjuntar documentación de respaldo
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {reportDraft.archivo?.name ?? 'Seleccionar archivo'}
+                </span>
+                <input
+                  type="file"
+                  onChange={(event) =>
+                    updateField('archivo', event.target.files?.[0] ?? null)
+                  }
+                  className="sr-only"
+                />
+              </span>
             </label>
-            <TextField
-              label="Contraseña para seguimiento *"
-              type="password"
-              required
-              minLength={6}
-              value={reportDraft.password}
-              onChange={(value) => updateField('password', value)}
-            />
+            <label className="block" htmlFor="passwordSeguimiento">
+              Contraseña para seguimiento *
+              <span className="relative mt-1 block">
+                <input
+                  id="passwordSeguimiento"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  minLength={6}
+                  value={reportDraft.password}
+                  onChange={(event) =>
+                    updateField('password', event.target.value)
+                  }
+                  className={`${INPUT_CLASS} pr-12`}
+                />
+                <button
+                  type="button"
+                  aria-label={
+                    showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                  }
+                  onClick={() => setShowPassword((current) => !current)}
+                  className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-muted-foreground hover:text-primary"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </span>
+            </label>
+
             <label className="flex gap-3">
               <input
                 type="checkbox"
@@ -345,12 +401,14 @@ export function SubmitReport() {
                 He leído la información de Ley Karin.
               </label>
             )}
-            <Link
-              to={`${channelBase}/informacion`}
-              className="inline-block text-primary underline"
-            >
-              Ver información sobre Ley Karin
-            </Link>
+            {isLeyKarin && (
+              <Link
+                to={`${channelBase}/informacion`}
+                className="inline-block text-primary underline"
+              >
+                Ver información sobre Ley Karin
+              </Link>
+            )}
             <SimpleCaptcha onVerify={setCaptcha} />
             <button
               disabled={loading}

@@ -20,6 +20,7 @@ const EMPTY_STATISTICS: EstadisticasEmpresaResponse = {
   totalDenuncias: 0,
   generales: 0,
   leyKarin: 0,
+  recibidas: 0,
   enRevision: 0,
   cerradas: 0,
 };
@@ -31,6 +32,7 @@ const STATISTICS: Array<{
   { key: 'totalDenuncias', label: 'Total' },
   { key: 'generales', label: 'Denuncias generales' },
   { key: 'leyKarin', label: 'Ley Karin' },
+  { key: 'recibidas', label: 'Recibidas' },
   { key: 'enRevision', label: 'En revisión' },
   { key: 'cerradas', label: 'Cerradas' },
 ];
@@ -48,6 +50,7 @@ export function AdminDashboard() {
   const [loadingEmpresas, setLoadingEmpresas] = useState(true);
   const [loadingData, setLoadingData] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const closeInvalidSession = useCallback(() => {
     localStorage.removeItem('adminCredentials');
@@ -70,6 +73,7 @@ export function AdminDashboard() {
       const currentRequestId = ++requestId.current;
       setLoadingData(true);
       setError('');
+      setSuccess('');
       setReports([]);
       setStatistics(EMPTY_STATISTICS);
       setSelected(null);
@@ -82,7 +86,15 @@ export function AdminDashboard() {
 
         if (requestId.current === currentRequestId) {
           setReports(newReports);
-          setStatistics(newStatistics);
+          setStatistics({
+            ...newStatistics,
+            recibidas: newReports.filter(
+              (report) => report.estado === 'RECIBIDA',
+            ).length,
+            enRevision: newReports.filter(
+              (report) => report.estado === 'EN_REVISION',
+            ).length,
+          });
         }
       } catch (requestError) {
         if (requestId.current === currentRequestId) {
@@ -183,6 +195,9 @@ export function AdminDashboard() {
         credentials,
       );
       updateReport(updated);
+      setSelected(null);
+      await loadEmpresaData(selectedEmpresaCodigo, credentials);
+      setSuccess('Detalle guardado correctamente.');
     } catch (requestError) {
       handleRequestError(requestError, 'No fue posible guardar el detalle.');
     }
@@ -246,6 +261,11 @@ export function AdminDashboard() {
             {error && (
               <p className="mb-5 rounded border border-red-200 bg-red-50 p-4 text-red-700">
                 {error}
+              </p>
+            )}
+            {success && (
+              <p className="mb-5 rounded border border-green-200 bg-green-50 p-4 text-green-700">
+                {success}
               </p>
             )}
             {loadingData ? (
