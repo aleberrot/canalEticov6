@@ -10,11 +10,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router';
 import { SimpleCaptcha } from '../components/SimpleCaptcha';
-import {
-  DELITOS,
-  DELITOS_LEY_KARIN,
-  obtenerDelitoPorCodigo,
-} from '../data/delitos';
+import { DELITOS } from '../data/delitos';
 import {
   EMPTY_REPORT_DRAFT,
   ReportDraft,
@@ -24,7 +20,7 @@ import {
   crearDenuncia,
   CrearDenunciaRequest,
   RelacionEmpresa,
-  TipoDenuncia,
+  MAX_ARCHIVO_BYTES,
 } from '../services/api';
 
 const INPUT_CLASS =
@@ -48,9 +44,8 @@ export function SubmitReport() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [codigo, setCodigo] = useState('');
-  const delito = obtenerDelitoPorCodigo(reportDraft.delitoCodigo);
-  const isLeyKarin = reportDraft.tipoDenuncia === 'LEY_KARIN';
-  const availableDelitos = isLeyKarin ? DELITOS_LEY_KARIN : DELITOS;
+  const delito = DELITOS.find((option) => option.codigo === reportDraft.delitoCodigo);
+  const availableDelitos = DELITOS;
   const channelBase = `/canal/${empresa.codigo}`;
 
   useEffect(() => {
@@ -82,8 +77,7 @@ export function SubmitReport() {
 
     if (
       !captcha ||
-      !reportDraft.aceptaVerdad ||
-      (isLeyKarin && !reportDraft.aceptaLeyKarin)
+      !reportDraft.aceptaVerdad
     ) {
       setError(
         'Completa las declaraciones y la verificación de seguridad.',
@@ -96,21 +90,9 @@ export function SubmitReport() {
       return;
     }
 
-    if (
-      isLeyKarin &&
-      (!reportDraft.nombreDenunciante ||
-        !reportDraft.emailDenunciante ||
-        !reportDraft.telefonoDenunciante)
-    ) {
-      setError(
-        'Nombre, correo y teléfono son obligatorios para Ley Karin.',
-      );
-      return;
-    }
-
     const request: CrearDenunciaRequest = {
       codigoEmpresa: empresa.codigo,
-      tipoDenuncia: reportDraft.tipoDenuncia,
+      tipoDenuncia: 'GENERAL',
       delitoCodigo: delito.codigo,
       delitoTipificacion: delito.tipificacion,
       delitoDescripcion: delito.descripcion,
@@ -209,22 +191,10 @@ export function SubmitReport() {
                 <AlertCircle className="h-5 w-5 text-red-600" /> {error}
               </div>
             )}
-            <label className="block">
-              Tipo de denuncia *
-              <select
-                value={reportDraft.tipoDenuncia}
-                onChange={(event) =>
-                  updateField(
-                    'tipoDenuncia',
-                    event.target.value as TipoDenuncia,
-                  )
-                }
-                className={INPUT_CLASS}
-              >
-                <option value="GENERAL">Denuncia general</option>
-                <option value="LEY_KARIN">Ley Karin</option>
-              </select>
-            </label>
+            <div>
+              <p>Tipo de denuncia</p>
+              <p className={INPUT_CLASS}>Denuncia general</p>
+            </div>
             <label className="block">
               Relación con la empresa *
               <select
@@ -295,12 +265,10 @@ export function SubmitReport() {
             />
             <div className="border-t pt-6">
               <h3 className="text-primary">
-                Información del denunciante{' '}
-                {isLeyKarin ? '(obligatoria para Ley Karin)' : '(opcional)'}
+                Información del denunciante (opcional)
               </h3>
               <div className="mt-3 grid gap-4 md:grid-cols-2">
                 <input
-                  required={isLeyKarin}
                   placeholder="Nombre completo"
                   value={reportDraft.nombreDenunciante}
                   onChange={(event) =>
@@ -309,7 +277,6 @@ export function SubmitReport() {
                   className={INPUT_CLASS}
                 />
                 <input
-                  required={isLeyKarin}
                   type="email"
                   placeholder="Correo electrónico"
                   value={reportDraft.emailDenunciante}
@@ -319,7 +286,6 @@ export function SubmitReport() {
                   className={INPUT_CLASS}
                 />
                 <input
-                  required={isLeyKarin}
                   placeholder="Teléfono"
                   value={reportDraft.telefonoDenunciante}
                   onChange={(event) =>
@@ -330,7 +296,7 @@ export function SubmitReport() {
               </div>
             </div>
             <label className="block">
-              <span className="mb-2 block">Documentación de respaldo</span>
+              <span className="mb-2 block">Documentación de respaldo (máximo 10 MiB)</span>
               <span className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-primary/40 bg-secondary/50 p-6 text-center hover:border-primary">
                 <Upload className="h-7 w-7 text-primary" />
                 <span className="font-medium text-primary">
@@ -341,9 +307,17 @@ export function SubmitReport() {
                 </span>
                 <input
                   type="file"
-                  onChange={(event) =>
-                    updateField('archivo', event.target.files?.[0] ?? null)
-                  }
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    if (file && file.size > MAX_ARCHIVO_BYTES) {
+                      setError('El archivo no puede superar 10 MiB.');
+                      event.target.value = '';
+                      updateField('archivo', null);
+                      return;
+                    }
+                    setError('');
+                    updateField('archivo', file);
+                  }}
                   className="sr-only"
                 />
               </span>
@@ -389,26 +363,6 @@ export function SubmitReport() {
               />
               Declaro que la información es verídica.
             </label>
-            {isLeyKarin && (
-              <label className="flex gap-3">
-                <input
-                  type="checkbox"
-                  checked={reportDraft.aceptaLeyKarin}
-                  onChange={(event) =>
-                    updateField('aceptaLeyKarin', event.target.checked)
-                  }
-                />
-                He leído la información de Ley Karin.
-              </label>
-            )}
-            {isLeyKarin && (
-              <Link
-                to={`${channelBase}/informacion`}
-                className="inline-block text-primary underline"
-              >
-                Ver información sobre Ley Karin
-              </Link>
-            )}
             <SimpleCaptcha onVerify={setCaptcha} />
             <button
               disabled={loading}

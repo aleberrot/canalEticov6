@@ -6,11 +6,10 @@ import {
   EmpresaPublicResponse,
   obtenerEmpresaPublica,
   RelacionEmpresa,
-  TipoDenuncia,
 } from '../services/api';
 
 export interface ReportDraft {
-  tipoDenuncia: TipoDenuncia;
+  tipoDenuncia: 'GENERAL';
   delitoCodigo: string;
   relacionEmpresa: RelacionEmpresa | '';
   descripcion: string;
@@ -23,7 +22,6 @@ export interface ReportDraft {
   password: string;
   archivo: File | null;
   aceptaVerdad: boolean;
-  aceptaLeyKarin: boolean;
 }
 
 export const EMPTY_REPORT_DRAFT: ReportDraft = {
@@ -40,7 +38,6 @@ export const EMPTY_REPORT_DRAFT: ReportDraft = {
   password: '',
   archivo: null,
   aceptaVerdad: false,
-  aceptaLeyKarin: false,
 };
 
 export interface PublicChannelContextValue {

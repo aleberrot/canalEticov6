@@ -5,7 +5,6 @@ import { Tracking } from './pages/Tracking';
 import { ReportStatus } from './pages/ReportStatus';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { AdminLogin } from './pages/AdminLogin';
-import { LeyKarinInfo } from './pages/LeyKarinInfo';
 import { PublicChannelLayout } from './layouts/PublicChannelLayout';
 
 export const router = createBrowserRouter([
@@ -40,10 +39,6 @@ export const router = createBrowserRouter([
       {
         path: 'denuncia',
         Component: SubmitReport,
-      },
-      {
-        path: 'informacion',
-        Component: LeyKarinInfo,
       },
     ],
   },

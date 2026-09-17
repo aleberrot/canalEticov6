@@ -34,13 +34,12 @@ export function Landing() {
           {empresa && <h2 className="mb-6 text-2xl">{empresa.nombre}</h2>}
 
           <p className="mb-4 max-w-2xl text-xl leading-relaxed text-foreground">
-            Canal seguro y confidencial para reportar acoso laboral, acoso
-            sexual, violencia o conductas inapropiadas en el lugar de trabajo.
+            Canal seguro y confidencial para reportar conductas inapropiadas,
+            irregularidades o situaciones que comprometan la ética de la empresa.
           </p>
           <p className="mb-12 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Tu reporte será tratado de manera <strong>anónima</strong> y{' '}
-            <strong>confidencial</strong>, conforme a la Ley Karin y las
-            normativas vigentes de protección laboral.
+            Tu reporte será tratado de manera <strong>confidencial</strong>.
+            Puedes enviarlo sin proporcionar tus datos personales.
           </p>
 
           <div className="flex w-full max-w-lg flex-col gap-4">
@@ -58,14 +57,6 @@ export function Landing() {
             >
               Consultar denuncia
             </Link>
-            {empresa && (
-              <Link
-                to={`${channelBase}/informacion`}
-                className="rounded-lg border border-primary/30 bg-accent px-8 py-4 text-center text-primary shadow-sm transition-colors hover:border-primary hover:bg-accent/70"
-              >
-                Ley Karin – Información
-              </Link>
-            )}
           </div>
 
           <div className="mt-12 text-sm text-muted-foreground">

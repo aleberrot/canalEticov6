@@ -1,4 +1,5 @@
-export const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
+export const API_URL = (import.meta.env.VITE_API_URL?.trim() || 'http://localhost:8080').replace(/\/+$/, '');
+export const MAX_ARCHIVO_BYTES = 10 * 1024 * 1024;
 
 export type TipoDenuncia = 'GENERAL' | 'LEY_KARIN';
 export type RelacionEmpresa =
@@ -108,11 +109,20 @@ export interface EstadisticasEmpresaResponse {
 
 export class ApiError extends Error {
   readonly status: number;
+  readonly kind: 'http' | 'validation' | 'network' | 'response';
+  readonly cause?: unknown;
 
-  constructor(message: string, status: number) {
+  constructor(
+    message: string,
+    status: number,
+    kind: ApiError['kind'] = [400, 413, 422].includes(status) ? 'validation' : 'http',
+    cause?: unknown,
+  ) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
+    this.kind = kind;
+    this.cause = cause;
   }
 }
 
@@ -146,26 +156,91 @@ export async function crearDenuncia(
   data: CrearDenunciaRequest,
   archivo?: File | null,
 ): Promise<CrearDenunciaResponse> {
+  if (archivo && archivo.size > MAX_ARCHIVO_BYTES) {
+    throw new ApiError('El archivo no puede superar 10 MiB.', 413);
+  }
   const form = new FormData();
   form.append(
     'data',
-    new Blob([JSON.stringify(data)], { type: 'application/json' }),
+    new Blob([JSON.stringify({ ...data, tipoDenuncia: 'GENERAL' })], { type: 'application/json' }),
+    'data.json',
   );
 
   if (archivo) {
     form.append('archivo', archivo);
   }
 
-  const response = await fetch(`${API_URL}/api/denuncias`, {
-    method: 'POST',
-    body: form,
-  });
+  const url = `${API_URL}/api/denuncias`;
+  let response: Response | undefined;
+  let responseBody: unknown;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      body: form,
+      credentials: 'omit',
+      // A redirect could change the method or resend confidential data to another host.
+      redirect: 'error',
+    });
 
-  if (!response.ok) {
-    return handleError(response);
+    const text = await response.text();
+    try {
+      responseBody = JSON.parse(text);
+    } catch {
+      responseBody = null;
+    }
+    if (!response.ok) {
+      const body = responseBody as ErrorResponse | null;
+      const message = response.status === 413
+        ? 'El archivo o la solicitud supera el tamaño permitido.'
+        : typeof body?.message === 'string'
+          ? body.message
+          : `No se pudo enviar la denuncia (HTTP ${response.status}).`;
+      throw new ApiError(message, response.status);
+    }
+    const result = responseBody as CrearDenunciaResponse | null;
+    if (!result || typeof result.codigo !== 'string' || !result.codigo ||
+        !['RECIBIDA', 'EN_REVISION', 'CERRADA'].includes(result.estado)) {
+      throw new ApiError(
+        'El servidor devolvió una respuesta inesperada. Contacta al administrador antes de reenviar la denuncia.',
+        response.status,
+        'response',
+      );
+    }
+    return result;
+  } catch (originalError) {
+    const error = originalError instanceof ApiError
+      ? originalError
+      : new ApiError(
+          'No fue posible comunicarse con el servidor. Por favor intenta nuevamente.',
+          response?.status ?? 0,
+          'network',
+          originalError,
+        );
+    // Never log the request, headers, raw response or arbitrary exception messages:
+    // validation/proxy errors can echo passwords, filenames and personal data.
+    const body = responseBody as { status?: unknown } | null;
+    const originalMessage = originalError instanceof Error ? originalError.message : '';
+    const safeFetchMessages = ['Failed to fetch', 'Load failed', 'NetworkError when attempting to fetch resource.'];
+    const requestId = response?.headers.get('X-Request-ID');
+    console.error('Error al crear denuncia', {
+      url,
+      method: 'POST',
+      kind: error.kind,
+      status: response?.status ?? null,
+      requestId: requestId && /^[a-zA-Z0-9-]{1,64}$/.test(requestId) ? requestId : null,
+      contentType: response?.headers.get('Content-Type')?.split(';')[0],
+      responseBody: response ? {
+        status: typeof body?.status === 'number' ? body.status : undefined,
+        content: '[omitido para proteger datos confidenciales]',
+      } : null,
+      originalError: {
+        name: originalError instanceof TypeError ? 'TypeError' :
+          originalError instanceof ApiError ? 'ApiError' : 'Error',
+        message: safeFetchMessages.includes(originalMessage) ? originalMessage : '[omitido]',
+      },
+    });
+    throw error;
   }
-
-  return response.json() as Promise<CrearDenunciaResponse>;
 }
 
 export async function consultarDenuncia(
