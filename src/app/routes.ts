@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router';
 import { Landing } from './pages/Landing';
-import { SubmitReport } from './pages/SubmitReport';
+import { SubmitReport, SubmitLeyKarinReport } from './pages/SubmitReport';
 import { Tracking } from './pages/Tracking';
 import { ReportStatus } from './pages/ReportStatus';
 import { AdminDashboard } from './pages/AdminDashboard';
@@ -40,6 +40,7 @@ export const router = createBrowserRouter([
         path: 'denuncia',
         Component: SubmitReport,
       },
+      { path: 'denuncia-ley-karin', Component: SubmitLeyKarinReport },
     ],
   },
 ]);

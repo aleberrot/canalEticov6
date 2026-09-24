@@ -275,3 +275,7 @@ export const obtenerDelitoPorTipificacion = (tipificacion: string): DelitoOption
   [...DELITOS, ...DELITOS_LEY_KARIN].find(
     (delito) => delito.tipificacion === tipificacion,
   );
+
+export const DELITOS_GENERALES = DELITOS.filter(
+  (delito) => !DELITOS_LEY_KARIN.some((karin) => karin.codigo === delito.codigo),
+);

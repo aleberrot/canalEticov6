@@ -9,7 +9,7 @@ import {
 } from '../services/api';
 
 export interface ReportDraft {
-  tipoDenuncia: 'GENERAL';
+  tipoDenuncia: 'GENERAL' | 'LEY_KARIN';
   delitoCodigo: string;
   relacionEmpresa: RelacionEmpresa | '';
   descripcion: string;
@@ -71,6 +71,7 @@ export function PublicChannelLayout() {
     const loadEmpresa = async () => {
       setLoading(true);
       setEmpresa(null);
+      setReportDraft(EMPTY_REPORT_DRAFT);
       setUnavailableMessage('');
 
       if (!codigoEmpresa) {

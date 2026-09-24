@@ -9,8 +9,10 @@ import {
   Upload,
 } from 'lucide-react';
 import { Link } from 'react-router';
+import { TermsGate } from '../components/TermsGate';
+import { TERMS } from '../data/terms';
 import { SimpleCaptcha } from '../components/SimpleCaptcha';
-import { DELITOS } from '../data/delitos';
+import { DELITOS_GENERALES, DELITOS_LEY_KARIN } from '../data/delitos';
 import {
   EMPTY_REPORT_DRAFT,
   ReportDraft,
@@ -37,6 +39,25 @@ const RELATIONSHIPS: RelacionEmpresa[] = [
 
 
 export function SubmitReport() {
+  return <ReportEntry key="GENERAL" tipoDenuncia="GENERAL" />;
+}
+
+export function SubmitLeyKarinReport() {
+  return <ReportEntry key="LEY_KARIN" tipoDenuncia="LEY_KARIN" />;
+}
+
+function ReportEntry({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KARIN' }) {
+  const [accepted, setAccepted] = useState(false);
+  const { setReportDraft } = usePublicChannel();
+  useEffect(() => {
+    setReportDraft({ ...EMPTY_REPORT_DRAFT, tipoDenuncia });
+  }, [tipoDenuncia, setReportDraft]);
+  return accepted
+    ? <ReportForm tipoDenuncia={tipoDenuncia} />
+    : <TermsGate tipoDenuncia={tipoDenuncia} onAccept={() => setAccepted(true)} />;
+}
+
+export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KARIN' }) {
 
   const { empresa, reportDraft, setReportDraft } = usePublicChannel();
   const [captcha, setCaptcha] = useState(false);
@@ -44,8 +65,9 @@ export function SubmitReport() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [codigo, setCodigo] = useState('');
-  const delito = DELITOS.find((option) => option.codigo === reportDraft.delitoCodigo);
-  const availableDelitos = DELITOS;
+  const isKarin = tipoDenuncia === 'LEY_KARIN';
+  const availableDelitos = isKarin ? DELITOS_LEY_KARIN : DELITOS_GENERALES;
+  const delito = availableDelitos.find((option) => option.codigo === reportDraft.delitoCodigo);
   const channelBase = `/canal/${empresa.codigo}`;
 
   useEffect(() => {
@@ -73,6 +95,7 @@ export function SubmitReport() {
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (loading) return;
     setError('');
 
     if (
@@ -92,7 +115,9 @@ export function SubmitReport() {
 
     const request: CrearDenunciaRequest = {
       codigoEmpresa: empresa.codigo,
-      tipoDenuncia: 'GENERAL',
+      tipoDenuncia,
+      terminosAceptados: true,
+      versionTerminos: TERMS.version,
       delitoCodigo: delito.codigo,
       delitoTipificacion: delito.tipificacion,
       delitoDescripcion: delito.descripcion,
@@ -181,7 +206,7 @@ export function SubmitReport() {
               />
             )}
             <div>
-              <h1 className="text-primary">Enviar Denuncia</h1>
+              <h1 className="text-primary">{isKarin ? 'Enviar denuncia por Ley Karin' : 'Enviar denuncia general'}</h1>
               <p className="text-muted-foreground">{empresa.nombre}</p>
             </div>
           </div>
@@ -193,7 +218,7 @@ export function SubmitReport() {
             )}
             <div>
               <p>Tipo de denuncia</p>
-              <p className={INPUT_CLASS}>Denuncia general</p>
+              <p className={INPUT_CLASS}>{isKarin ? 'Denuncia por Ley Karin' : 'Denuncia general'}</p>
             </div>
             <label className="block">
               Relación con la empresa *
@@ -243,12 +268,14 @@ export function SubmitReport() {
             )}
             <TextAreaField
               label="Descripción detallada *"
+              minLength={20}
               required
               value={reportDraft.descripcion}
               onChange={(value) => updateField('descripcion', value)}
             />
             <TextField
               label="Personas involucradas"
+              maxLength={200}
               value={reportDraft.personasInvolucradas}
               onChange={(value) => updateField('personasInvolucradas', value)}
             />
@@ -265,11 +292,13 @@ export function SubmitReport() {
             />
             <div className="border-t pt-6">
               <h3 className="text-primary">
-                Información del denunciante (opcional)
+                Información del denunciante ({isKarin ? 'obligatoria' : 'opcional'})
               </h3>
               <div className="mt-3 grid gap-4 md:grid-cols-2">
                 <input
                   placeholder="Nombre completo"
+                  aria-label="Nombre completo"
+                  required={isKarin}
                   value={reportDraft.nombreDenunciante}
                   onChange={(event) =>
                     updateField('nombreDenunciante', event.target.value)
@@ -279,6 +308,8 @@ export function SubmitReport() {
                 <input
                   type="email"
                   placeholder="Correo electrónico"
+                  aria-label="Correo electrónico"
+                  required={isKarin}
                   value={reportDraft.emailDenunciante}
                   onChange={(event) =>
                     updateField('emailDenunciante', event.target.value)
@@ -287,6 +318,8 @@ export function SubmitReport() {
                 />
                 <input
                   placeholder="Teléfono"
+                  aria-label="Teléfono"
+                  required={isKarin}
                   value={reportDraft.telefonoDenunciante}
                   onChange={(event) =>
                     updateField('telefonoDenunciante', event.target.value)
@@ -296,7 +329,7 @@ export function SubmitReport() {
               </div>
             </div>
             <label className="block">
-              <span className="mb-2 block">Documentación de respaldo (máximo 10 MiB)</span>
+              <span className="mb-2 block">Documentación de respaldo (máximo 50 MB)</span>
               <span className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-primary/40 bg-secondary/50 p-6 text-center hover:border-primary">
                 <Upload className="h-7 w-7 text-primary" />
                 <span className="font-medium text-primary">
@@ -310,7 +343,7 @@ export function SubmitReport() {
                   onChange={(event) => {
                     const file = event.target.files?.[0] ?? null;
                     if (file && file.size > MAX_ARCHIVO_BYTES) {
-                      setError('El archivo no puede superar 10 MiB.');
+                      setError('El archivo no puede superar 50 MB.');
                       event.target.value = '';
                       updateField('archivo', null);
                       return;
@@ -385,6 +418,7 @@ interface TextFieldProps {
   type?: string;
   required?: boolean;
   minLength?: number;
+  maxLength?: number;
 }
 
 function TextField({ label, onChange, ...inputProps }: TextFieldProps) {
@@ -405,6 +439,7 @@ interface TextAreaFieldProps {
   value: string;
   onChange: (value: string) => void;
   required?: boolean;
+  minLength?: number;
 }
 
 function TextAreaField({

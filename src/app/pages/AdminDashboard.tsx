@@ -1,3 +1,4 @@
+import { AportesHistory } from '../components/AportesHistory';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Download, Eye, Loader2, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router';
@@ -6,6 +7,7 @@ import {
   actualizarEstadoDenuncia,
   DenunciaAdminResponse,
   descargarArchivo,
+  descargarAporte,
   EmpresaAdminResponse,
   esErrorNoAutorizado,
   EstadisticasEmpresaResponse,
@@ -205,7 +207,7 @@ export function AdminDashboard() {
 
   const download = async (codigo: string) => {
     try {
-      await descargarArchivo(codigo, credentials);
+      await descargarArchivo(codigo, credentials, reports.find((report) => report.codigoUnico === codigo)?.nombreArchivo);
     } catch (requestError) {
       handleRequestError(requestError, 'No fue posible descargar el archivo.');
     }
@@ -296,6 +298,8 @@ export function AdminDashboard() {
       {selected && (
         <ReportModal
           report={selected}
+          credentials={credentials}
+          onDownload={download}
           onChange={setSelected}
           onClose={() => setSelected(null)}
           onChangeStatus={changeStatus}
@@ -390,6 +394,8 @@ function ReportsTable({ reports, onSelect, onDownload }: ReportsTableProps) {
 }
 
 interface ReportModalProps {
+  credentials: string;
+  onDownload: (codigo: string) => Promise<void>;
   report: DenunciaAdminResponse;
   onChange: (report: DenunciaAdminResponse) => void;
   onClose: () => void;
@@ -401,55 +407,61 @@ interface ReportModalProps {
 }
 
 function ReportModal({
-  report,
-  onChange,
-  onClose,
-  onChangeStatus,
-  onSave,
+  report, credentials, onDownload, onChange, onClose, onChangeStatus, onSave,
 }: ReportModalProps) {
-  const fields = [
-    'nombreDenunciado',
-    'fechaDescargo',
-    'descargo',
-    'conclusionesMedidas',
-  ] as const;
-
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[90vh] w-full max-w-2xl space-y-4 overflow-y-auto rounded-lg bg-white p-6">
-        <button onClick={onClose} className="float-right">×</button>
-        <h2>{report.codigoUnico}</h2>
-        <p><b>{report.delitoTipificacion}</b></p>
-        <p>{report.descripcion}</p>
-        <select
-          value={report.estado}
-          onChange={(event) =>
-            void onChangeStatus(report, event.target.value as EstadoDenuncia)
-          }
-          className="rounded border p-2"
-        >
-          <option value="EN_REVISION">En revisión</option>
-          <option value="CERRADA">Cerrada</option>
-        </select>
-        {fields.map((field) => (
-          <label key={field} className="block">
-            {field}
-            <input
-              type={field === 'fechaDescargo' ? 'date' : 'text'}
-              value={report[field] ?? ''}
-              onChange={(event) =>
-                onChange({ ...report, [field]: event.target.value })
-              }
-              className="block w-full rounded border p-2"
-            />
+      <div role="dialog" aria-modal="true" aria-label={`Detalle ${report.codigoUnico}`} className="max-h-[90vh] w-full max-w-3xl space-y-6 overflow-y-auto rounded-lg bg-white p-6">
+        <button onClick={onClose} aria-label="Cerrar detalle" className="float-right">×</button>
+        <h2 className="text-xl text-primary">{report.codigoUnico} · {report.tipoDenuncia}</h2>
+        <label className="block">Estado actual
+          <select value={report.estado} onChange={(event) => void onChangeStatus(report, event.target.value as EstadoDenuncia)} className="ml-3 rounded border p-2">
+            <option value="RECIBIDA">Recibida</option>
+            <option value="EN_REVISION">En revisión</option>
+            <option value="CERRADA">Cerrada</option>
+          </select>
+        </label>
+        <section className="space-y-3 border-t pt-5">
+          <h3 className="text-lg text-primary">1. Información inicial</h3>
+          <dl className="grid gap-4 sm:grid-cols-2">
+            {([
+              ['Tipificación', report.delitoTipificacion], ['Código del delito', report.delitoCodigo],
+              ['Detalle del delito', report.delitoDescripcion], ['Descripción', report.descripcion],
+              ['Personas involucradas', report.personasInvolucradas], ['Testigos', report.testigos],
+              ['Fecha del incidente', report.fechaIncidente], ['Relación con empresa', report.relacionEmpresa],
+              ['Nombre del denunciante', report.nombreDenunciante], ['Correo', report.emailDenunciante],
+              ['Teléfono', report.telefonoDenunciante], ['Fecha de creación', report.createdAt],
+              ['Última actualización', report.updatedAt],
+            ] as const).map(([label, value]) => <div key={label}>
+              <dt className="text-sm text-muted-foreground">{label}</dt>
+              <dd className="whitespace-pre-wrap break-words">{value || 'No informado'}</dd>
+            </div>)}
+          </dl>
+          <h4 className="pt-3 font-medium">Respaldo inicial</h4>
+          {report.tieneArchivo ? <button type="button" onClick={() => void onDownload(report.codigoUnico)} className="flex items-center gap-2 text-primary underline">
+            <Download className="h-4 w-4" /> {report.nombreArchivo || 'Descargar respaldo inicial'}
+          </button> : <p className="text-muted-foreground">Sin archivo inicial.</p>}
+        </section>
+        <AportesHistory aportes={report.aportes} legacyInfo={report.informacionAdicional}
+          onDownload={(aporte) => descargarAporte(report.codigoUnico, aporte, { credentials })} />
+        <section className="space-y-4 border-t pt-5">
+          <h3 className="text-lg text-primary">3. Descargo</h3>
+          <label className="block">Nombre denunciado
+            <input value={report.nombreDenunciado ?? ''} onChange={(event) => onChange({ ...report, nombreDenunciado: event.target.value })} className="block w-full rounded border p-2" />
           </label>
-        ))}
-        <button
-          onClick={() => void onSave()}
-          className="rounded bg-primary p-2 text-primary-foreground"
-        >
-          Guardar detalle
-        </button>
+          <label className="block">Fecha descargo
+            <input type="date" value={report.fechaDescargo ?? ''} onChange={(event) => onChange({ ...report, fechaDescargo: event.target.value })} className="block w-full rounded border p-2" />
+          </label>
+          <label className="block">Descargo
+            <textarea rows={5} value={report.descargo ?? ''} onChange={(event) => onChange({ ...report, descargo: event.target.value })} className="block w-full rounded border p-2" />
+          </label>
+        </section>
+        <section className="space-y-3 border-t pt-5">
+          <h3 className="text-lg text-primary">4. Conclusiones y medidas</h3>
+          <p className="text-sm text-muted-foreground">Este contenido estará visible para el denunciante en su seguimiento.</p>
+          <textarea aria-label="Conclusiones y medidas" rows={5} value={report.conclusionesMedidas ?? ''} onChange={(event) => onChange({ ...report, conclusionesMedidas: event.target.value })} className="block w-full rounded border p-2" />
+        </section>
+        <button onClick={() => void onSave()} className="rounded bg-primary p-3 text-primary-foreground">Guardar detalle</button>
       </div>
     </div>
   );

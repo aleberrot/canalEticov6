@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   AlertCircle,
   ArrowLeft,
@@ -10,9 +10,13 @@ import {
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import {
   agregarInformacionAdicional,
+  descargarAporte,
+  MAX_ARCHIVO_BYTES,
   consultarDenuncia,
   SeguimientoDenunciaResponse,
 } from '../services/api';
+
+import { AportesHistory } from '../components/AportesHistory';
 
 interface TrackingLocationState {
   password?: string;
@@ -27,6 +31,8 @@ export function ReportStatus() {
     useState<SeguimientoDenunciaResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const fileInput = useRef<HTMLInputElement>(null);
+  const sendingRef = useRef(false);
   const [additionalInfo, setAdditionalInfo] = useState('');
   const [additionalFile, setAdditionalFile] = useState<File | null>(null);
   const [sendingAdditional, setSendingAdditional] = useState(false);
@@ -59,6 +65,7 @@ export function ReportStatus() {
 
   const sendAdditionalInformation = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (sendingRef.current) return;
 
     if (!code || !password || (!additionalInfo.trim() && !additionalFile)) {
       setAdditionalFeedback(
@@ -68,6 +75,7 @@ export function ReportStatus() {
     }
 
     try {
+      sendingRef.current = true;
       setSendingAdditional(true);
       setAdditionalFeedback('');
       const updatedReport = await agregarInformacionAdicional(
@@ -79,6 +87,7 @@ export function ReportStatus() {
       setReport(updatedReport);
       setAdditionalInfo('');
       setAdditionalFile(null);
+      if (fileInput.current) fileInput.current.value = '';
       setAdditionalFeedback('Información adicional enviada correctamente.');
     } catch (requestError) {
       setAdditionalFeedback(
@@ -87,6 +96,7 @@ export function ReportStatus() {
           : 'No fue posible enviar la información adicional.',
       );
     } finally {
+      sendingRef.current = false;
       setSendingAdditional(false);
     }
   };
@@ -155,12 +165,10 @@ export function ReportStatus() {
             <InfoRow
               icon={<Calendar className="mt-1 h-5 w-5 text-primary" />}
               label="Fecha de creación"
-              value={new Date(report.createdAt).toLocaleDateString('es-CL', {
+              value={new Date(`${report.createdAt}T00:00:00`).toLocaleDateString('es-CL', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
               })}
             />
             <InfoRow
@@ -169,15 +177,11 @@ export function ReportStatus() {
               value={report.tipoDenuncia}
             />
             <ContentBlock title="Descripción enviada" content={report.descripcion} />
-            {report.informacionAdicional && (
-              <ContentBlock
-                title="Información adicional"
-                content={report.informacionAdicional}
-              />
-            )}
+            <AportesHistory aportes={report.aportes} legacyInfo={report.informacionAdicional}
+              onDownload={(aporte) => descargarAporte(report.codigoUnico, aporte, { password: password! })} />
             {report.conclusionesMedidas && (
               <ContentBlock
-                title="Conclusiones y medidas tomadas"
+                title="Conclusiones y medidas"
                 content={report.conclusionesMedidas}
                 emphasized
               />
@@ -206,16 +210,26 @@ export function ReportStatus() {
               <label className="block cursor-pointer rounded-lg border-2 border-dashed border-primary/40 bg-secondary/50 p-5 text-center">
                 <Upload className="mx-auto mb-2 h-6 w-6 text-primary" />
                 <span className="block font-medium text-primary">
-                  Adjuntar documento adicional
+                  Adjuntar documento adicional (máximo 50 MB)
                 </span>
                 <span className="mt-1 block text-sm text-muted-foreground">
                   {additionalFile?.name ?? 'Seleccionar archivo'}
                 </span>
                 <input
                   type="file"
-                  onChange={(event) =>
-                    setAdditionalFile(event.target.files?.[0] ?? null)
-                  }
+                  ref={fileInput}
+                  disabled={sendingAdditional}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    if (file && file.size > MAX_ARCHIVO_BYTES) {
+                      setAdditionalFeedback('El archivo no puede superar 50 MB.');
+                      event.target.value = '';
+                      setAdditionalFile(null);
+                      return;
+                    }
+                    setAdditionalFeedback('');
+                    setAdditionalFile(file);
+                  }}
                   className="sr-only"
                 />
               </label>

@@ -1,5 +1,5 @@
 export const API_URL = (import.meta.env.VITE_API_URL?.trim() || 'http://localhost:8080').replace(/\/+$/, '');
-export const MAX_ARCHIVO_BYTES = 10 * 1024 * 1024;
+export const MAX_ARCHIVO_BYTES = 50 * 1024 * 1024;
 
 export type TipoDenuncia = 'GENERAL' | 'LEY_KARIN';
 export type RelacionEmpresa =
@@ -26,6 +26,8 @@ export interface CrearDenunciaRequest {
   telefonoDenunciante?: string;
   testigos?: string;
   password: string;
+  terminosAceptados?: boolean;
+  versionTerminos?: string;
 }
 
 export interface CrearDenunciaResponse {
@@ -38,6 +40,15 @@ export interface SeguimientoRequest {
   password: string;
 }
 
+export interface AporteDenunciaResponse {
+  id: string;
+  informacion?: string;
+  nombreArchivo?: string;
+  tieneArchivo: boolean;
+  createdAt?: string;
+  legacy: boolean;
+}
+
 export interface SeguimientoDenunciaResponse {
   codigoUnico: string;
   tipoDenuncia: TipoDenuncia;
@@ -45,12 +56,15 @@ export interface SeguimientoDenunciaResponse {
   estado: EstadoDenuncia;
   descripcion: string;
   informacionAdicional?: string;
+  aportes?: AporteDenunciaResponse[];
   conclusionesMedidas?: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface DenunciaAdminResponse {
+  tieneArchivo?: boolean;
+  nombreArchivo?: string;
   codigoUnico: string;
   tipoDenuncia: TipoDenuncia;
   delitoCodigo: string;
@@ -70,6 +84,7 @@ export interface DenunciaAdminResponse {
   descargo?: string;
   conclusionesMedidas?: string;
   informacionAdicional?: string;
+  aportes?: AporteDenunciaResponse[];
   createdAt: string;
   updatedAt: string;
 }
@@ -157,12 +172,12 @@ export async function crearDenuncia(
   archivo?: File | null,
 ): Promise<CrearDenunciaResponse> {
   if (archivo && archivo.size > MAX_ARCHIVO_BYTES) {
-    throw new ApiError('El archivo no puede superar 10 MiB.', 413);
+    throw new ApiError('El archivo no puede superar 50 MB.', 413);
   }
   const form = new FormData();
   form.append(
     'data',
-    new Blob([JSON.stringify({ ...data, tipoDenuncia: 'GENERAL' })], { type: 'application/json' }),
+    new Blob([JSON.stringify(data)], { type: 'application/json' }),
     'data.json',
   );
 
@@ -267,6 +282,12 @@ export async function agregarInformacionAdicional(
   informacion?: string,
   archivo?: File | null,
 ): Promise<SeguimientoDenunciaResponse> {
+  if (archivo && archivo.size > MAX_ARCHIVO_BYTES) {
+    throw new ApiError('El archivo no puede superar 50 MB.', 413);
+  }
+  if (!informacion?.trim() && (!archivo || archivo.size === 0)) {
+    throw new ApiError('Escribe información o selecciona un documento para continuar.', 400);
+  }
   const form = new FormData();
   form.append('password', password);
 
@@ -278,13 +299,20 @@ export async function agregarInformacionAdicional(
     form.append('archivo', archivo);
   }
 
-  const response = await fetch(
+  let response: Response;
+  try {
+    response = await fetch(
     `${API_URL}/api/denuncias/${codigo}/informacion-adicional`,
     {
       method: 'POST',
       body: form,
+      credentials: 'omit',
+      redirect: 'error',
     },
   );
+  } catch (cause) {
+    throw new ApiError('No se pudo confirmar el envío. Consulta el historial antes de reenviar para evitar duplicados.', 0, 'network', cause);
+  }
 
   if (!response.ok) {
     return handleError(response);
@@ -414,6 +442,7 @@ export async function actualizarDetalleAdmin(
 export async function descargarArchivo(
   codigo: string,
   credentials: string,
+  nombreArchivo?: string,
 ): Promise<void> {
   const response = await fetch(
     `${API_URL}/api/admin/denuncias/${codigo}/archivo`,
@@ -427,7 +456,31 @@ export async function descargarArchivo(
   const url = URL.createObjectURL(await response.blob());
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = `denuncia-${codigo}`;
+  anchor.download = nombreArchivo || `denuncia-${codigo}`;
   anchor.click();
   URL.revokeObjectURL(url);
+}
+
+export async function descargarAporte(
+  codigo: string,
+  aporte: AporteDenunciaResponse,
+  auth: { password: string } | { credentials: string },
+): Promise<void> {
+  const admin = 'credentials' in auth;
+  const path = `/api/${admin ? 'admin/' : ''}denuncias/${encodeURIComponent(codigo)}/aportes/${encodeURIComponent(aporte.id)}/archivo`;
+  const response = await fetch(`${API_URL}${path}`, admin ? {
+    headers: basicAuth(auth.credentials), redirect: 'error', credentials: 'omit',
+  } : {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: auth.password }), redirect: 'error', credentials: 'omit',
+  });
+  if (!response.ok) return handleError(response);
+  const url = URL.createObjectURL(await response.blob());
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = aporte.nombreArchivo || 'documento';
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

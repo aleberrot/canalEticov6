@@ -160,7 +160,7 @@ export function LeyKarinInfo() {
               </Link>
               
               <Link 
-                to={`${channelBase}/denuncia`}
+                to={`${channelBase}/denuncia-ley-karin`}
                 className="flex-1 bg-primary text-primary-foreground py-4 px-6 rounded-lg hover:bg-primary/90 transition-colors shadow-md text-center"
               >
                 Continuar para enviar denuncia

@@ -39,7 +39,7 @@ export function Landing() {
           </p>
           <p className="mb-12 max-w-2xl text-lg leading-relaxed text-muted-foreground">
             Tu reporte será tratado de manera <strong>confidencial</strong>.
-            Puedes enviarlo sin proporcionar tus datos personales.
+            La denuncia general permite omitir tus datos personales. Para Ley Karin se requiere identificación.
           </p>
 
           <div className="flex w-full max-w-lg flex-col gap-4">
@@ -48,7 +48,13 @@ export function Landing() {
                 to={`${channelBase}/denuncia`}
                 className="rounded-lg bg-primary px-8 py-4 text-center text-primary-foreground shadow-md transition-colors hover:bg-primary/90"
               >
-                Enviar denuncia
+                Enviar denuncia general
+              </Link>
+            )}
+            {empresa && (
+              <Link to={`${channelBase}/denuncia-ley-karin`}
+                className="rounded-lg border-2 border-primary bg-secondary px-8 py-4 text-center text-primary shadow-md transition-colors hover:bg-accent">
+                Enviar denuncia por Ley Karin
               </Link>
             )}
             <Link

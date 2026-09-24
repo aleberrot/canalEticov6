@@ -1,24 +1,29 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter, Outlet, Route, Routes } from 'react-router';
 import { Landing } from '../src/app/pages/Landing';
-import { SubmitReport } from '../src/app/pages/SubmitReport';
+import { SubmitReport, SubmitLeyKarinReport, ReportForm } from '../src/app/pages/SubmitReport';
+import { AportesHistory } from '../src/app/components/AportesHistory';
 import { EMPTY_REPORT_DRAFT } from '../src/app/layouts/PublicChannelLayout';
 
 export function renderPage(path: string) {
-  // Even a stale draft cannot reactivate the former public type selector.
   const context = {
     empresa: { codigo: 'emp-test', nombre: 'Empresa de prueba', activa: true },
-    reportDraft: { ...EMPTY_REPORT_DRAFT, tipoDenuncia: 'LEY_KARIN', delitoCodigo: 'DEL-045' },
+    reportDraft: EMPTY_REPORT_DRAFT,
     setReportDraft: () => {},
   };
   return renderToStaticMarkup(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route element={<Outlet context={context} />}>
-          <Route path="/" element={<Landing />} />
-          <Route path="/denuncia" element={<SubmitReport />} />
-        </Route>
-      </Routes>
-    </MemoryRouter>,
+    <MemoryRouter initialEntries={[path]}><Routes>
+      <Route element={<Outlet context={context} />}>
+        <Route path="/" element={<Landing />} />
+        <Route path="/denuncia" element={<SubmitReport />} />
+        <Route path="/denuncia-ley-karin" element={<SubmitLeyKarinReport />} />
+        <Route path="/accepted-general" element={<ReportForm tipoDenuncia="GENERAL" />} />
+        <Route path="/accepted-karin" element={<ReportForm tipoDenuncia="LEY_KARIN" />} />
+      </Route>
+    </Routes></MemoryRouter>,
   );
+}
+
+export function renderHistory(aportes, legacyInfo) {
+  return renderToStaticMarkup(<AportesHistory aportes={aportes} legacyInfo={legacyInfo} onDownload={async () => {}} />);
 }

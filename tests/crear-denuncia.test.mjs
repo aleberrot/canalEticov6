@@ -24,7 +24,7 @@ const request = {
 const success = { codigo: 'DEN-TEST', estado: 'RECIBIDA' };
 
 for (const withFile of [false, true]) {
-  test(`multipart real y GENERAL obligatorio ${withFile ? 'con' : 'sin'} archivo`, async () => {
+  test(`multipart real y tipo seleccionado ${withFile ? 'con' : 'sin'} archivo`, async () => {
     const file = withFile ? new File(['evidencia sintética'], 'evidencia.txt', { type: 'text/plain' }) : null;
     globalThis.fetch = async (url, options) => {
       assert.equal(url, 'https://api.example.test/api/denuncias');
@@ -39,7 +39,7 @@ for (const withFile of [false, true]) {
       const data = form.get('data');
       assert.equal(data.type, 'application/json');
       assert.equal(data.name, 'data.json');
-      assert.deepEqual(JSON.parse(await data.text()), { ...request, tipoDenuncia: 'GENERAL' });
+      assert.deepEqual(JSON.parse(await data.text()), request);
       if (withFile) assert.equal(await form.get('archivo').text(), 'evidencia sintética');
       else assert.equal(form.get('archivo'), null);
       return Response.json(success, { status: 201 });
