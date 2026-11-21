@@ -86,6 +86,10 @@ export function PublicChannelLayout() {
         const response = await obtenerEmpresaPublica(codigoEmpresa);
         if (!active) return;
 
+        if (response.codigo !== codigoEmpresa) {
+          throw new Error('Respuesta de empresa inconsistente');
+        }
+
         if (!response.activa) {
           setUnavailableMessage(
             'Este canal ético no se encuentra disponible actualmente.',
@@ -101,7 +105,9 @@ export function PublicChannelLayout() {
         setUnavailableMessage(
           inactive
             ? 'Este canal ético no se encuentra disponible actualmente.'
-            : 'El enlace utilizado no corresponde a un canal ético válido.',
+            : requestError instanceof ApiError && requestError.status === 404
+              ? 'El enlace utilizado no corresponde a un canal ético válido.'
+              : 'No se pudo cargar el canal. Intenta nuevamente en unos momentos.',
         );
       } finally {
         if (active) setLoading(false);
@@ -114,7 +120,7 @@ export function PublicChannelLayout() {
     };
   }, [codigoEmpresa]);
 
-  if (loading) {
+  if (loading || (empresa && empresa.codigo !== codigoEmpresa)) {
     return (
       <div className="flex min-h-screen items-center justify-center gap-2 bg-gradient-to-b from-secondary to-white">
         <Loader2 className="h-5 w-5 animate-spin" />
@@ -127,7 +133,7 @@ export function PublicChannelLayout() {
     return <UnavailableChannel message={unavailableMessage} />;
   }
 
-  return <Outlet context={{ empresa, reportDraft, setReportDraft }} />;
+  return <Outlet key={empresa.codigo} context={{ empresa, reportDraft, setReportDraft }} />;
 }
 
 export function usePublicChannel() {

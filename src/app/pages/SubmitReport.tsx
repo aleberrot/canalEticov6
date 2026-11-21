@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   AlertCircle,
   ArrowLeft,
@@ -60,6 +60,12 @@ function ReportEntry({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KARIN' }
 export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KARIN' }) {
 
   const { empresa, reportDraft, setReportDraft } = usePublicChannel();
+  const submitting = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
   const [captcha, setCaptcha] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -95,7 +101,7 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (loading) return;
+    if (submitting.current) return;
     setError('');
 
     if (
@@ -133,8 +139,10 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
     };
 
     try {
+      submitting.current = true;
       setLoading(true);
       const response = await crearDenuncia(request, reportDraft.archivo);
+      if (!mounted.current) return;
       setCodigo(response.codigo);
       setReportDraft(EMPTY_REPORT_DRAFT);
     } catch (requestError) {
@@ -144,6 +152,7 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
           : 'No se pudo enviar la denuncia.',
       );
     } finally {
+      submitting.current = false;
       setLoading(false);
     }
   };
@@ -210,7 +219,7 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
               <p className="text-muted-foreground">{empresa.nombre}</p>
             </div>
           </div>
-          <form onSubmit={submit} className="space-y-6">
+          <form onSubmit={submit} autoComplete="off" className="space-y-6">
             {error && (
               <div className="flex gap-3 rounded-lg border-2 border-red-200 bg-red-50 p-4">
                 <AlertCircle className="h-5 w-5 text-red-600" /> {error}
@@ -317,6 +326,10 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
                   className={INPUT_CLASS}
                 />
                 <input
+                  type="tel"
+                  name="report-contact-phone"
+                  autoComplete="off"
+                  inputMode="tel"
                   placeholder="Teléfono"
                   aria-label="Teléfono"
                   required={isKarin}
@@ -360,6 +373,8 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
               <span className="relative mt-1 block">
                 <input
                   id="passwordSeguimiento"
+                  name="report-tracking-password"
+                  autoComplete="new-password"
                   type={showPassword ? 'text' : 'password'}
                   required
                   minLength={6}

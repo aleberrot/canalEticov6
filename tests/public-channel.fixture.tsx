@@ -1,3 +1,5 @@
+import { ReportDetails } from '../src/app/pages/ReportStatus';
+import { AdminDashboard } from '../src/app/pages/AdminDashboard';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter, Outlet, Route, Routes } from 'react-router';
 import { Landing } from '../src/app/pages/Landing';
@@ -13,6 +15,7 @@ export function renderPage(path: string) {
   };
   return renderToStaticMarkup(
     <MemoryRouter initialEntries={[path]}><Routes>
+      <Route path="/admin" element={<AdminDashboard />} />
       <Route element={<Outlet context={context} />}>
         <Route path="/" element={<Landing />} />
         <Route path="/denuncia" element={<SubmitReport />} />
@@ -26,4 +29,9 @@ export function renderPage(path: string) {
 
 export function renderHistory(aportes, legacyInfo) {
   return renderToStaticMarkup(<AportesHistory aportes={aportes} legacyInfo={legacyInfo} onDownload={async () => {}} />);
+}
+
+
+export function renderReportDetails(report) {
+  return renderToStaticMarkup(<ReportDetails report={report} password="synthetic-test-password" />);
 }

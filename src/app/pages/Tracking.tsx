@@ -14,18 +14,19 @@ export function Tracking() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setError('');
     setLoading(true);
 
     try {
       // Call API to verify and get report
       await consultarDenuncia({
-        codigo: formData.codigo,
+        code: formData.codigo.trim(),
         password: formData.password
       });
 
       // If successful, navigate to status page
-      navigate(`/status/${formData.codigo}`, {
+      navigate(`/status/${encodeURIComponent(formData.codigo.trim())}`, {
         state: { password: formData.password }
       });
     } catch (err) {

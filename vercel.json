@@ -4,5 +4,10 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "audit-essential-fixes-20261121": false
+    }
+  }
 }

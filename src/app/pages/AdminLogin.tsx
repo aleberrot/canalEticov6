@@ -1,3 +1,4 @@
+import { WebetikoBrand } from '../components/WebetikoBrand';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router';
@@ -44,6 +45,7 @@ export function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-secondary to-white py-12">
+      <WebetikoBrand />
       <div className="container mx-auto max-w-md px-4">
         <Link to="/">Volver al inicio</Link>
         <div className="mt-8 rounded-lg bg-white p-8 shadow-lg">

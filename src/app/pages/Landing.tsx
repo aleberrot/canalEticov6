@@ -1,3 +1,6 @@
+import { CHANNEL_INTRO } from '../data/terms';
+import { TermsDisclosure } from '../components/TermsDisclosure';
+import { WebetikoBrand } from '../components/WebetikoBrand';
 import { Shield } from 'lucide-react';
 import { Link } from 'react-router';
 import { useOptionalPublicChannel } from '../layouts/PublicChannelLayout';
@@ -9,6 +12,7 @@ export function Landing() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
+      <WebetikoBrand />
       {empresa?.banner && (
         <img
           src={empresa.banner}
@@ -33,10 +37,11 @@ export function Landing() {
           <h1 className="mb-3 text-5xl text-primary">Canal Ético</h1>
           {empresa && <h2 className="mb-6 text-2xl">{empresa.nombre}</h2>}
 
-          <p className="mb-4 max-w-2xl text-xl leading-relaxed text-foreground">
-            Canal seguro y confidencial para reportar conductas inapropiadas,
-            irregularidades o situaciones que comprometan la ética de la empresa.
+          <p className="mb-4 max-w-2xl text-lg leading-relaxed text-foreground">
+            {empresa ? CHANNEL_INTRO.replaceAll('{empresa}', empresa.nombre) :
+              'Canal seguro y confidencial para reportar conductas inapropiadas e irregularidades.'}
           </p>
+          <div className="mb-6 max-w-2xl"><TermsDisclosure /></div>
           <p className="mb-12 max-w-2xl text-lg leading-relaxed text-muted-foreground">
             Tu reporte será tratado de manera <strong>confidencial</strong>.
             La denuncia general permite omitir tus datos personales. Para Ley Karin se requiere identificación.

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { TERMS } from '../data/terms';
+import { CHANNEL_INTRO } from '../data/terms';
+import { TermsDisclosure } from './TermsDisclosure';
 import { usePublicChannel } from '../layouts/PublicChannelLayout';
 
 export function TermsGate({ tipoDenuncia, onAccept }: {
@@ -14,11 +15,9 @@ export function TermsGate({ tipoDenuncia, onAccept }: {
         <Link to={`/canal/${empresa.codigo}`} className="text-primary underline">Volver al inicio</Link>
         <h1 className="text-2xl text-primary">{tipoDenuncia === 'GENERAL' ? 'Enviar denuncia general' : 'Enviar denuncia por Ley Karin'}</h1>
         <p>{empresa.nombre}</p>
+        <p>{CHANNEL_INTRO.replaceAll('{empresa}', empresa.nombre)}</p>
         <p>Por favor coloque la mayor cantidad de datos posibles al realizar su reporte.</p>
-        <details className="rounded-lg border p-4">
-          <summary className="cursor-pointer text-primary underline">{TERMS.title}</summary>
-          <div className="mt-4 space-y-3">{TERMS.paragraphs.map((text) => <p key={text}>{text}</p>)}</div>
-        </details>
+        <TermsDisclosure />
         <form className="space-y-6" onSubmit={(event) => { event.preventDefault(); if (checked) onAccept(); }}>
           <label className="flex items-start gap-3">
             <input type="checkbox" required checked={checked} onChange={(event) => setChecked(event.target.checked)} className="mt-1" />
@@ -28,6 +27,7 @@ export function TermsGate({ tipoDenuncia, onAccept }: {
             Continuar al formulario
           </button>
         </form>
+        <p className="text-sm text-muted-foreground">Para un óptimo funcionamiento de la plataforma, se recomienda la utilización del navegador Google Chrome</p>
       </div>
     </div>
   );
