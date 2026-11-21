@@ -43,3 +43,35 @@ test('dos denuncias independientes no reutilizan datos ni adjuntos en el transpo
   assert.equal(sent[1].data.codigoEmpresa, 'emp-02');
   assert.equal(sent[1].file, null);
 });
+
+test('la espera de empresa tolera arranque en frío sin superar dos minutos', async () => {
+  const originalTimeout = AbortSignal.timeout;
+  let requestedTimeout;
+  AbortSignal.timeout = (ms) => {
+    requestedTimeout = ms;
+    return originalTimeout.call(AbortSignal, ms);
+  };
+  try {
+    globalThis.fetch = async () => Response.json({ codigo: 'emp-01', nombre: 'Empresa 1', activa: true });
+    await api.obtenerEmpresaPublica('emp-01');
+    assert.ok(requestedTimeout >= 60000, '15 s interrumpe un arranque en frío');
+    assert.ok(requestedTimeout <= 120000, 'la espera debe permanecer acotada');
+  } finally {
+    AbortSignal.timeout = originalTimeout;
+  }
+});
+test('abandonar un canal cancela su consulta pendiente sin reintentos automáticos', async () => {
+  const controller = new AbortController();
+  let calls = 0;
+  globalThis.fetch = (_url, options) => {
+    calls++;
+    return new Promise((_resolve, reject) => {
+      options.signal.addEventListener('abort', () => reject(options.signal.reason), { once: true });
+    });
+  };
+  const result = assert.rejects(api.obtenerEmpresaPublica('emp-01', controller.signal),
+    error => error.name === 'AbortError');
+  controller.abort();
+  await result;
+  assert.equal(calls, 1);
+});

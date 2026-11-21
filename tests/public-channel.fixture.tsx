@@ -1,3 +1,4 @@
+import { ChannelLoading, UnavailableChannel } from '../src/app/layouts/PublicChannelLayout';
 import { ReportDetails } from '../src/app/pages/ReportStatus';
 import { AdminDashboard } from '../src/app/pages/AdminDashboard';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -34,4 +35,11 @@ export function renderHistory(aportes, legacyInfo) {
 
 export function renderReportDetails(report) {
   return renderToStaticMarkup(<ReportDetails report={report} password="synthetic-test-password" />);
+}
+
+export function renderChannelLoading(slow) {
+  return renderToStaticMarkup(<ChannelLoading slow={slow} />);
+}
+export function renderChannelUnavailable(retry) {
+  return renderToStaticMarkup(<UnavailableChannel message="No se pudo cargar el canal." onRetry={retry ? () => {} : undefined} />);
 }

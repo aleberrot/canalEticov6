@@ -46,12 +46,19 @@ export interface PublicChannelContextValue {
   setReportDraft: React.Dispatch<React.SetStateAction<ReportDraft>>;
 }
 
-function UnavailableChannel({ message }: { message: string }) {
+export function UnavailableChannel({ message, onRetry }: {
+  message: string; onRetry?: () => void;
+}) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-secondary to-white px-4">
       <div className="max-w-lg rounded-lg bg-white p-8 text-center shadow-lg">
         <h1 className="mb-4 text-primary">Canal no disponible</h1>
         <p className="text-muted-foreground">{message}</p>
+        {onRetry && (
+          <button type="button" onClick={onRetry} className="mt-6 rounded bg-primary px-5 py-3 text-primary-foreground">
+            Volver a intentar
+          </button>
+        )}
       </div>
     </div>
   );
@@ -64,12 +71,19 @@ export function PublicChannelLayout() {
     useState<ReportDraft>(EMPTY_REPORT_DRAFT);
   const [loading, setLoading] = useState(true);
   const [unavailableMessage, setUnavailableMessage] = useState('');
+  const [retryCount, setRetryCount] = useState(0);
+  const [slowLoading, setSlowLoading] = useState(false);
+  const [retryAllowed, setRetryAllowed] = useState(false);
 
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
+    const slowTimer = setTimeout(() => { if (active) setSlowLoading(true); }, 10000);
 
     const loadEmpresa = async () => {
       setLoading(true);
+      setSlowLoading(false);
+      setRetryAllowed(false);
       setEmpresa(null);
       setReportDraft(EMPTY_REPORT_DRAFT);
       setUnavailableMessage('');
@@ -83,7 +97,7 @@ export function PublicChannelLayout() {
       }
 
       try {
-        const response = await obtenerEmpresaPublica(codigoEmpresa);
+        const response = await obtenerEmpresaPublica(codigoEmpresa, controller.signal);
         if (!active) return;
 
         if (response.codigo !== codigoEmpresa) {
@@ -100,6 +114,7 @@ export function PublicChannelLayout() {
         setEmpresa(response);
       } catch (requestError) {
         if (!active) return;
+        setRetryAllowed(!(requestError instanceof ApiError && [404, 409].includes(requestError.status)));
         const inactive =
           requestError instanceof ApiError && requestError.status === 409;
         setUnavailableMessage(
@@ -110,6 +125,7 @@ export function PublicChannelLayout() {
               : 'No se pudo cargar el canal. Intenta nuevamente en unos momentos.',
         );
       } finally {
+        clearTimeout(slowTimer);
         if (active) setLoading(false);
       }
     };
@@ -117,20 +133,17 @@ export function PublicChannelLayout() {
     void loadEmpresa();
     return () => {
       active = false;
+      clearTimeout(slowTimer);
+      controller.abort();
     };
-  }, [codigoEmpresa]);
+  }, [codigoEmpresa, retryCount]);
 
   if (loading || (empresa && empresa.codigo !== codigoEmpresa)) {
-    return (
-      <div className="flex min-h-screen items-center justify-center gap-2 bg-gradient-to-b from-secondary to-white">
-        <Loader2 className="h-5 w-5 animate-spin" />
-        Cargando canal...
-      </div>
-    );
+    return <ChannelLoading slow={slowLoading} />;
   }
 
   if (!empresa) {
-    return <UnavailableChannel message={unavailableMessage} />;
+    return <UnavailableChannel message={unavailableMessage} onRetry={retryAllowed ? () => setRetryCount((count) => count + 1) : undefined} />;
   }
 
   return <Outlet key={empresa.codigo} context={{ empresa, reportDraft, setReportDraft }} />;
@@ -142,4 +155,14 @@ export function usePublicChannel() {
 
 export function useOptionalPublicChannel() {
   return useOutletContext<PublicChannelContextValue | null>();
+}
+
+export function ChannelLoading({ slow }: { slow: boolean }) {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-gradient-to-b from-secondary to-white px-4 text-center" role="status">
+      <Loader2 className="h-5 w-5 animate-spin" />
+      <p>Cargando canal...</p>
+      {slow && <p className="max-w-md text-muted-foreground">El servicio está tardando en responder. El inicio puede demorar hasta 90 segundos. Mantén esta página abierta.</p>}
+    </div>
+  );
 }

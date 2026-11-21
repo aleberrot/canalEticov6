@@ -341,10 +341,11 @@ export async function obtenerEmpresas(
 
 export async function obtenerEmpresaPublica(
   codigo: string,
+  signal?: AbortSignal,
 ): Promise<EmpresaPublicResponse> {
   const response = await fetch(
     `${API_URL}/api/empresas/${encodeURIComponent(codigo)}`,
-    { signal: AbortSignal.timeout(15000), credentials: 'omit', redirect: 'error' },
+    { signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(90000)]) : AbortSignal.timeout(90000), credentials: 'omit', redirect: 'error' },
   );
 
   if (!response.ok) {
