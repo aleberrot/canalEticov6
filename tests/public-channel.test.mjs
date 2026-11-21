@@ -5,7 +5,17 @@ import { createServer } from 'vite';
 test('flujos separados, términos obligatorios y trazabilidad pública', async (t) => {
   const server = await createServer({ configFile: false, esbuild: { jsx: 'automatic' }, optimizeDeps: { noDiscovery: true, include: [] }, server: { middlewareMode: true, watch: null }, appType: 'custom' });
   try {
-    const { renderPage, renderHistory, renderReportDetails, renderAdminLogin } = await server.ssrLoadModule('/tests/public-channel.fixture.tsx');
+    const { renderPage, renderHistory, renderReportDetails, renderAdminLogin, renderChannelLoading, renderChannelUnavailable } = await server.ssrLoadModule('/tests/public-channel.fixture.tsx');
+    await t.test('arranque lento informa espera acotada sin declarar inválida la empresa', () => {
+      const loading = renderChannelLoading(true);
+      assert.match(loading, /90 segundos/);
+      assert.doesNotMatch(loading, /Canal no disponible|enlace.*válido/);
+      assert.doesNotMatch(renderChannelLoading(false), /90 segundos/);
+    });
+    await t.test('error transitorio permite reintentar y empresa inactiva no propone reintento', () => {
+      assert.match(renderChannelUnavailable(true), /Volver a intentar/);
+      assert.doesNotMatch(renderChannelUnavailable(false), /Volver a intentar/);
+    });
     await t.test('landing muestra general y luego Ley Karin', () => {
       const landing = renderPage('/');
       assert.ok(landing.indexOf('Enviar denuncia general') < landing.indexOf('Enviar denuncia por Ley Karin'));

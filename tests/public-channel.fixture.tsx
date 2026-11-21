@@ -1,3 +1,4 @@
+import { ChannelLoading, UnavailableChannel } from '../src/app/layouts/PublicChannelLayout';
 import { AdminLogin } from '../src/app/pages/AdminLogin';
 import { ReportDetails } from '../src/app/pages/ReportStatus';
 import { AdminDashboard } from '../src/app/pages/AdminDashboard';
@@ -39,4 +40,11 @@ export function renderReportDetails(report) {
 
 export function renderAdminLogin() {
   return renderToStaticMarkup(<MemoryRouter><AdminLogin /></MemoryRouter>);
+}
+
+export function renderChannelLoading(slow) {
+  return renderToStaticMarkup(<ChannelLoading slow={slow} />);
+}
+export function renderChannelUnavailable(retry) {
+  return renderToStaticMarkup(<UnavailableChannel message="No se pudo cargar el canal." onRetry={retry ? () => {} : undefined} />);
 }
