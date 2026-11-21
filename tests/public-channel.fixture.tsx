@@ -1,3 +1,4 @@
+import { AdminLogin } from '../src/app/pages/AdminLogin';
 import { ReportDetails } from '../src/app/pages/ReportStatus';
 import { AdminDashboard } from '../src/app/pages/AdminDashboard';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -7,9 +8,9 @@ import { SubmitReport, SubmitLeyKarinReport, ReportForm } from '../src/app/pages
 import { AportesHistory } from '../src/app/components/AportesHistory';
 import { EMPTY_REPORT_DRAFT } from '../src/app/layouts/PublicChannelLayout';
 
-export function renderPage(path: string) {
+export function renderPage(path: string, empresa = { codigo: 'emp-test', nombre: 'Empresa de prueba', activa: true }) {
   const context = {
-    empresa: { codigo: 'emp-test', nombre: 'Empresa de prueba', activa: true },
+    empresa,
     reportDraft: EMPTY_REPORT_DRAFT,
     setReportDraft: () => {},
   };
@@ -34,4 +35,8 @@ export function renderHistory(aportes, legacyInfo) {
 
 export function renderReportDetails(report) {
   return renderToStaticMarkup(<ReportDetails report={report} password="synthetic-test-password" />);
+}
+
+export function renderAdminLogin() {
+  return renderToStaticMarkup(<MemoryRouter><AdminLogin /></MemoryRouter>);
 }

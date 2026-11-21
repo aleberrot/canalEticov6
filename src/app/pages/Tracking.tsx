@@ -1,3 +1,4 @@
+import { WebetikoBrand } from '../components/WebetikoBrand';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { ArrowLeft, Search, Loader2, AlertCircle } from 'lucide-react';
@@ -53,6 +54,7 @@ export function Tracking() {
         </Link>
         
         <div className="bg-white rounded-lg shadow-lg p-8">
+          <WebetikoBrand className="mb-4" />
           <div className="flex items-center gap-3 mb-6">
             <div className="bg-primary/10 p-3 rounded-lg">
               <Search className="w-6 h-6 text-primary" />

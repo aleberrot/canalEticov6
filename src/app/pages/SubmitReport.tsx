@@ -1,3 +1,4 @@
+import { ClientLogo } from '../components/ClientLogo';
 import { useEffect, useRef, useState } from 'react';
 import {
   AlertCircle,
@@ -162,13 +163,7 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
       <div className="min-h-screen bg-gradient-to-b from-secondary to-white py-12">
         <div className="container mx-auto max-w-2xl px-4">
           <div className="rounded-lg bg-white p-8 text-center shadow-lg">
-            {empresa.logo && (
-              <img
-                src={empresa.logo}
-                alt={`Logo de ${empresa.nombre}`}
-                className="mx-auto mb-6 max-h-24 max-w-56 object-contain"
-              />
-            )}
+            <ClientLogo empresa={empresa} className="mx-auto mb-6" />
             <CheckCircle className="mx-auto mb-6 h-20 w-20 text-green-600" />
             <h1 className="mb-2 text-primary">
               Denuncia enviada correctamente
@@ -207,13 +202,7 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
         </Link>
         <div className="rounded-lg bg-white p-8 shadow-lg">
           <div className="mb-6 flex items-center gap-4">
-            {empresa.logo && (
-              <img
-                src={empresa.logo}
-                alt={`Logo de ${empresa.nombre}`}
-                className="max-h-16 max-w-40 object-contain"
-              />
-            )}
+            <ClientLogo empresa={empresa} compact />
             <div>
               <h1 className="text-primary">{isKarin ? 'Enviar denuncia por Ley Karin' : 'Enviar denuncia general'}</h1>
               <p className="text-muted-foreground">{empresa.nombre}</p>
