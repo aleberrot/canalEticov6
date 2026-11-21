@@ -1,3 +1,4 @@
+import { ClientLogo } from './ClientLogo';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { CHANNEL_INTRO } from '../data/terms';
@@ -12,8 +13,13 @@ export function TermsGate({ tipoDenuncia, onAccept }: {
   return (
     <div className="min-h-screen bg-gradient-to-b from-secondary to-white px-4 py-12">
       <div className="mx-auto max-w-3xl space-y-6 rounded-lg bg-white p-8 shadow-lg">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-4">
         <Link to={`/canal/${empresa.codigo}`} className="text-primary underline">Volver al inicio</Link>
         <h1 className="text-2xl text-primary">{tipoDenuncia === 'GENERAL' ? 'Enviar denuncia general' : 'Enviar denuncia por Ley Karin'}</h1>
+          </div>
+          <ClientLogo empresa={empresa} compact />
+        </header>
         <p>{empresa.nombre}</p>
         <p>{CHANNEL_INTRO.replaceAll('{empresa}', empresa.nombre)}</p>
         <p>Por favor coloque la mayor cantidad de datos posibles al realizar su reporte.</p>

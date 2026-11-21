@@ -45,10 +45,10 @@ export function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-secondary to-white py-12">
-      <WebetikoBrand />
       <div className="container mx-auto max-w-md px-4">
         <Link to="/">Volver al inicio</Link>
         <div className="mt-8 rounded-lg bg-white p-8 shadow-lg">
+          <WebetikoBrand layout="vertical" className="mb-4" />
           <h1 className="text-primary">Panel Administrativo</h1>
           <form onSubmit={submit} className="mt-6 space-y-5">
             {error && (

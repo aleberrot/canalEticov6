@@ -20,6 +20,6 @@ La empresa existe y está activa. El código publicado limitaba la consulta a 15
 - No se inventan empresas, no se omite la comprobación de actividad y no se muestra contenido de otro cliente.
 - No hay reintentos automáticos ni envíos de denuncias de prueba a producción.
 
-Validación: 43 pruebas frontend aprobadas, TypeScript estricto y compilación Vite aprobados. Las cuatro regresiones nuevas comprueban el presupuesto de arranque, la cancelación, el aviso de demora y la acción de reintento.
+Validación de integración: 46 pruebas frontend, TypeScript estricto y compilación Vite. Se conservaron los logos oficiales de WEBETIKO y Mathiesen y las pruebas de separación entre clientes.
 
-Se prepara en fix-emp01-startup-20261121, con despliegue automático Vercel deshabilitado para esa rama y PR en borrador. Esta corrección no migra el alojamiento ni elimina los arranques en frío del servidor; tolera su demora y permite recuperar la carga. El diagnóstico/cotización de alojamiento continúa separado.
+La publicación de las correcciones fue autorizada por el usuario el 21/11/2026. Se integra con main mediante la PR #2 antes del despliegue. Esta corrección tolera la demora del servidor y permite recuperar la carga; el diagnóstico/cotización de alojamiento continúa separado.

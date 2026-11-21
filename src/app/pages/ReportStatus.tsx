@@ -1,4 +1,4 @@
-import { WebetikoBrand } from '../components/WebetikoBrand';
+import { ClientLogo } from '../components/ClientLogo';
 import { useEffect, useRef, useState } from 'react';
 import {
   AlertCircle,
@@ -287,11 +287,7 @@ export function ReportDetails({ report, password }: {
 }) {
   return (
     <>
-      <WebetikoBrand />
-      {report.empresa?.logo && (
-        <img src={report.empresa.logo} alt={`Logo de ${report.empresa.nombre}`}
-          className="mx-auto mb-6 max-h-24 max-w-56 object-contain" />
-      )}
+      {report.empresa && <ClientLogo empresa={report.empresa} className="mb-6" />}
           <header className="mb-6 flex items-start justify-between border-b border-border pb-6">
             <div>
               <h1 className="mb-2 text-primary">Estado de Denuncia</h1>

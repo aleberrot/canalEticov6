@@ -226,7 +226,7 @@ export function AdminDashboard() {
   return (
     <div className="min-h-screen bg-secondary">
       <header className="bg-primary p-6 text-primary-foreground">
-        <WebetikoBrand inverse />
+        <WebetikoBrand inverse compact />
         <div className="container mx-auto flex justify-between">
           <h1>Panel Administrativo</h1>
           <button onClick={logout}>Salir</button>

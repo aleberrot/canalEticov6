@@ -5,7 +5,7 @@ import { createServer } from 'vite';
 test('flujos separados, términos obligatorios y trazabilidad pública', async (t) => {
   const server = await createServer({ configFile: false, esbuild: { jsx: 'automatic' }, optimizeDeps: { noDiscovery: true, include: [] }, server: { middlewareMode: true, watch: null }, appType: 'custom' });
   try {
-    const { renderPage, renderHistory, renderReportDetails, renderChannelLoading, renderChannelUnavailable } = await server.ssrLoadModule('/tests/public-channel.fixture.tsx');
+    const { renderPage, renderHistory, renderReportDetails, renderAdminLogin, renderChannelLoading, renderChannelUnavailable } = await server.ssrLoadModule('/tests/public-channel.fixture.tsx');
     await t.test('arranque lento informa espera acotada sin declarar inválida la empresa', () => {
       const loading = renderChannelLoading(true);
       assert.match(loading, /90 segundos/);
@@ -43,8 +43,30 @@ test('flujos separados, términos obligatorios y trazabilidad pública', async (
         assert.equal((detail.match(new RegExp('src="/' + code + '.webp"', 'g')) ?? []).length, 1);
         const other = code === 'emp-01' ? 'emp-02' : 'emp-01';
         assert.ok(!detail.includes('/' + other + '.webp'));
-        assert.equal((detail.match(/WEBETIKO/g) ?? []).length, 1);
+        assert.doesNotMatch(detail, /alt="WEBETIKO/);
       }
+    });
+    await t.test('Mathiesen usa canal propio y logos oficiales en inicio, términos y formularios', () => {
+      const empresa = { codigo: 'mathiesen', nombre: 'Grupo Mathiesen', logo: '/empresas/mathiesen/logo.png', activa: true };
+      const landing = renderPage('/', empresa);
+      assert.match(landing, /src="\/empresas\/mathiesen\/logo.png"/);
+      assert.match(landing, /src="\/marca\/webetiko-horizontal.png"/);
+      assert.match(landing, /\/canal\/mathiesen\/denuncia/);
+      for (const path of ['/denuncia', '/denuncia-ley-karin', '/accepted-general', '/accepted-karin']) {
+        assert.match(renderPage(path, empresa), /src="\/empresas\/mathiesen\/logo.png"/);
+      }
+    });
+    await t.test('el logo real de Mathiesen no se asigna a los ejemplos', () => {
+      for (const codigo of ['emp-01', 'emp-02']) {
+        const example = renderPage('/', { codigo, nombre: 'Ejemplo', logo: '/empresas/' + codigo + '/logo.webp', activa: true });
+        assert.ok(example.includes('/empresas/' + codigo + '/logo.webp'));
+        assert.ok(!example.includes('/empresas/mathiesen/'));
+      }
+    });
+    await t.test('administración usa WEBETIKO vertical en login y horizontal en cabecera', () => {
+      assert.match(renderAdminLogin(), /src="\/marca\/webetiko-vertical.png"/);
+      assert.match(renderPage('/admin'), /src="\/marca\/webetiko-horizontal.png"/);
+      assert.doesNotMatch(renderAdminLogin(), /\/empresas\/mathiesen/);
     });
     for (const path of ['/denuncia', '/denuncia-ley-karin']) {
       await t.test(`acceso directo ${path} exige términos antes del formulario`, () => {
