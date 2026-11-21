@@ -3,13 +3,38 @@ import { test } from 'node:test';
 import { createServer } from 'vite';
 
 test('flujos separados, términos obligatorios y trazabilidad pública', async (t) => {
-  const server = await createServer({ server: { middlewareMode: true, watch: null }, appType: 'custom' });
+  const server = await createServer({ configFile: false, esbuild: { jsx: 'automatic' }, optimizeDeps: { noDiscovery: true, include: [] }, server: { middlewareMode: true, watch: null }, appType: 'custom' });
   try {
-    const { renderPage, renderHistory } = await server.ssrLoadModule('/tests/public-channel.fixture.tsx');
+    const { renderPage, renderHistory, renderReportDetails } = await server.ssrLoadModule('/tests/public-channel.fixture.tsx');
     await t.test('landing muestra general y luego Ley Karin', () => {
       const landing = renderPage('/');
       assert.ok(landing.indexOf('Enviar denuncia general') < landing.indexOf('Enviar denuncia por Ley Karin'));
       assert.match(landing, /\/canal\/emp-test\/denuncia-ley-karin/);
+    });
+    await t.test('inicio incorpora introducción aprobada y acceso a términos', () => {
+      const landing = renderPage('/');
+      assert.ok(landing.includes('La empresa Empresa de prueba ha implementado'));
+      assert.ok(landing.includes('Términos y condiciones'));
+      assert.ok(landing.includes('soporte@conthrol.com'));
+    });
+    await t.test('WEBETIKO aparece en cabecera administrativa sin abrir un detalle', () => {
+      assert.match(renderPage('/admin'), /<header[^>]*>[\s\S]*?WEBETIKO[\s\S]*?<\/header>/);
+    });
+    await t.test('seguimiento cargado renderiza descripción, conclusión y un único logo por cliente', () => {
+      for (const code of ['emp-01', 'emp-02']) {
+        const detail = renderReportDetails({
+          codigoUnico: 'DEN-PRUEBA', tipoDenuncia: 'GENERAL', estado: 'RECIBIDA',
+          descripcion: 'Descripción sintética', conclusionesMedidas: 'Conclusión sintética',
+          createdAt: '2026-11-21', updatedAt: '2026-11-21', aportes: [],
+          empresa: { codigo: code, nombre: code, logo: '/' + code + '.webp', activa: true },
+        });
+        assert.ok(detail.includes('Descripción sintética'));
+        assert.ok(detail.includes('Conclusión sintética'));
+        assert.equal((detail.match(new RegExp('src="/' + code + '.webp"', 'g')) ?? []).length, 1);
+        const other = code === 'emp-01' ? 'emp-02' : 'emp-01';
+        assert.ok(!detail.includes('/' + other + '.webp'));
+        assert.equal((detail.match(/WEBETIKO/g) ?? []).length, 1);
+      }
     });
     for (const path of ['/denuncia', '/denuncia-ley-karin']) {
       await t.test(`acceso directo ${path} exige términos antes del formulario`, () => {

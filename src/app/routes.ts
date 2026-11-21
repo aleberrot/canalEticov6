@@ -1,10 +1,6 @@
 import { createBrowserRouter } from 'react-router';
 import { Landing } from './pages/Landing';
 import { SubmitReport, SubmitLeyKarinReport } from './pages/SubmitReport';
-import { Tracking } from './pages/Tracking';
-import { ReportStatus } from './pages/ReportStatus';
-import { AdminDashboard } from './pages/AdminDashboard';
-import { AdminLogin } from './pages/AdminLogin';
 import { PublicChannelLayout } from './layouts/PublicChannelLayout';
 
 export const router = createBrowserRouter([
@@ -14,19 +10,19 @@ export const router = createBrowserRouter([
   },
   {
     path: '/tracking',
-    Component: Tracking,
+    lazy: async () => ({ Component: (await import('./pages/Tracking')).Tracking }),
   },
   {
     path: '/status/:code',
-    Component: ReportStatus,
+    lazy: async () => ({ Component: (await import('./pages/ReportStatus')).ReportStatus }),
   },
   {
     path: '/admin',
-    Component: AdminLogin,
+    lazy: async () => ({ Component: (await import('./pages/AdminLogin')).AdminLogin }),
   },
   {
     path: '/admin/dashboard',
-    Component: AdminDashboard,
+    lazy: async () => ({ Component: (await import('./pages/AdminDashboard')).AdminDashboard }),
   },
   {
     path: '/canal/:codigoEmpresa',

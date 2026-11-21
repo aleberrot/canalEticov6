@@ -1,3 +1,4 @@
+import { WebetikoBrand } from '../components/WebetikoBrand';
 import { useEffect, useRef, useState } from 'react';
 import {
   AlertCircle,
@@ -24,6 +25,12 @@ interface TrackingLocationState {
 
 export function ReportStatus() {
   const { code } = useParams();
+  const location = useLocation();
+  return <ReportStatusSession key={code + ':' + location.key} />;
+}
+
+function ReportStatusSession() {
+  const { code } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const password = (location.state as TrackingLocationState | null)?.password;
@@ -39,6 +46,7 @@ export function ReportStatus() {
   const [additionalFeedback, setAdditionalFeedback] = useState('');
 
   useEffect(() => {
+    let active = true;
     if (!code || !password) {
       navigate('/tracking', { replace: true });
       return;
@@ -48,19 +56,22 @@ export function ReportStatus() {
       try {
         setLoading(true);
         setError('');
-        setReport(await consultarDenuncia({ code, password }));
+        const response = await consultarDenuncia({ code, password });
+        if (active) setReport(response);
       } catch (requestError) {
+        if (!active) return;
         setError(
           requestError instanceof Error
             ? requestError.message
             : 'No se pudo cargar la información de la denuncia.',
         );
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     void fetchReport();
+    return () => { active = false; };
   }, [code, navigate, password]);
 
   const sendAdditionalInformation = async (event: React.FormEvent) => {
@@ -148,45 +159,7 @@ export function ReportStatus() {
           <ArrowLeft className="h-4 w-4" /> Volver a consulta
         </Link>
         <div className="rounded-lg bg-white p-8 shadow-lg">
-          <header className="mb-6 flex items-start justify-between border-b border-border pb-6">
-            <div>
-              <h1 className="mb-2 text-primary">Estado de Denuncia</h1>
-              <p className="text-muted-foreground">
-                Código: {report.codigoUnico}
-              </p>
-            </div>
-            <span
-              className={`rounded-full border px-4 py-2 ${getStatusColor(report.estado)}`}
-            >
-              {report.estado}
-            </span>
-          </header>
-          <div className="space-y-6">
-            <InfoRow
-              icon={<Calendar className="mt-1 h-5 w-5 text-primary" />}
-              label="Fecha de creación"
-              value={new Date(`${report.createdAt}T00:00:00`).toLocaleDateString('es-CL', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            />
-            <InfoRow
-              icon={<FileText className="mt-1 h-5 w-5 text-primary" />}
-              label="Tipo de denuncia"
-              value={report.tipoDenuncia}
-            />
-            <ContentBlock title="Descripción enviada" content={report.descripcion} />
-            <AportesHistory aportes={report.aportes} legacyInfo={report.informacionAdicional}
-              onDownload={(aporte) => descargarAporte(report.codigoUnico, aporte, { password: password! })} />
-            {report.conclusionesMedidas && (
-              <ContentBlock
-                title="Conclusiones y medidas"
-                content={report.conclusionesMedidas}
-                emphasized
-              />
-            )}
-          </div>
+          <ReportDetails report={report} password={password!} />
           {report.tipoDenuncia === 'GENERAL' && (
             <form
               onSubmit={sendAdditionalInformation}
@@ -305,5 +278,59 @@ function ContentBlock({ title, content, emphasized }: ContentBlockProps) {
         <p className="whitespace-pre-wrap">{content}</p>
       </div>
     </section>
+  );
+}
+
+// Render the authenticated report separately so its complete loaded view is tested.
+export function ReportDetails({ report, password }: {
+  report: SeguimientoDenunciaResponse; password: string;
+}) {
+  return (
+    <>
+      <WebetikoBrand />
+      {report.empresa?.logo && (
+        <img src={report.empresa.logo} alt={`Logo de ${report.empresa.nombre}`}
+          className="mx-auto mb-6 max-h-24 max-w-56 object-contain" />
+      )}
+          <header className="mb-6 flex items-start justify-between border-b border-border pb-6">
+            <div>
+              <h1 className="mb-2 text-primary">Estado de Denuncia</h1>
+              <p className="text-muted-foreground">
+                Código: {report.codigoUnico}
+              </p>
+            </div>
+            <span
+              className={`rounded-full border px-4 py-2 ${getStatusColor(report.estado)}`}
+            >
+              {report.estado}
+            </span>
+          </header>
+          <div className="space-y-6">
+            <InfoRow
+              icon={<Calendar className="mt-1 h-5 w-5 text-primary" />}
+              label="Fecha de creación"
+              value={new Date(`${report.createdAt}T00:00:00`).toLocaleDateString('es-CL', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            />
+            <InfoRow
+              icon={<FileText className="mt-1 h-5 w-5 text-primary" />}
+              label="Tipo de denuncia"
+              value={report.tipoDenuncia}
+            />
+            <ContentBlock title="Descripción enviada" content={report.descripcion} />
+            <AportesHistory aportes={report.aportes} legacyInfo={report.informacionAdicional}
+              onDownload={(aporte) => descargarAporte(report.codigoUnico, aporte, { password })} />
+            {report.conclusionesMedidas && (
+              <ContentBlock
+                title="Conclusiones y medidas"
+                content={report.conclusionesMedidas}
+                emphasized
+              />
+            )}
+          </div>
+    </>
   );
 }

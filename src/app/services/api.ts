@@ -50,6 +50,7 @@ export interface AporteDenunciaResponse {
 }
 
 export interface SeguimientoDenunciaResponse {
+  empresa?: EmpresaPublicResponse;
   codigoUnico: string;
   tipoDenuncia: TipoDenuncia;
   delitoTipificacion: string;
@@ -263,6 +264,9 @@ export async function consultarDenuncia(
 ): Promise<SeguimientoDenunciaResponse> {
   const response = await fetch(`${API_URL}/api/denuncias/seguimiento`, {
     method: 'POST',
+    credentials: 'omit',
+    redirect: 'error',
+    signal: AbortSignal.timeout(15000),
     headers: {
       'Content-Type': 'application/json',
     },
@@ -340,6 +344,7 @@ export async function obtenerEmpresaPublica(
 ): Promise<EmpresaPublicResponse> {
   const response = await fetch(
     `${API_URL}/api/empresas/${encodeURIComponent(codigo)}`,
+    { signal: AbortSignal.timeout(15000), credentials: 'omit', redirect: 'error' },
   );
 
   if (!response.ok) {

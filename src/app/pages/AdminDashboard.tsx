@@ -1,3 +1,4 @@
+import { WebetikoBrand } from '../components/WebetikoBrand';
 import { AportesHistory } from '../components/AportesHistory';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Download, Eye, Loader2, RefreshCw } from 'lucide-react';
@@ -169,12 +170,14 @@ export function AdminDashboard() {
     report: DenunciaAdminResponse,
     estado: EstadoDenuncia,
   ) => {
+    const operationId = requestId.current;
     try {
       const updated = await actualizarEstadoDenuncia(
         report.codigoUnico,
         estado,
         credentials,
       );
+      if (requestId.current !== operationId) return;
       updateReport(updated);
       void loadEmpresaData(selectedEmpresaCodigo, credentials);
     } catch (requestError) {
@@ -184,6 +187,7 @@ export function AdminDashboard() {
 
   const saveDetails = async () => {
     if (!selected) return;
+    const operationId = requestId.current;
 
     try {
       const updated = await actualizarDetalleAdmin(
@@ -196,6 +200,7 @@ export function AdminDashboard() {
         },
         credentials,
       );
+      if (requestId.current !== operationId) return;
       updateReport(updated);
       setSelected(null);
       await loadEmpresaData(selectedEmpresaCodigo, credentials);
@@ -221,6 +226,7 @@ export function AdminDashboard() {
   return (
     <div className="min-h-screen bg-secondary">
       <header className="bg-primary p-6 text-primary-foreground">
+        <WebetikoBrand inverse />
         <div className="container mx-auto flex justify-between">
           <h1>Panel Administrativo</h1>
           <button onClick={logout}>Salir</button>
