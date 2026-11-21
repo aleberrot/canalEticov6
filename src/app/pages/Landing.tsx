@@ -1,3 +1,4 @@
+import { ClientLogo } from '../components/ClientLogo';
 import { CHANNEL_INTRO } from '../data/terms';
 import { TermsDisclosure } from '../components/TermsDisclosure';
 import { WebetikoBrand } from '../components/WebetikoBrand';
@@ -12,7 +13,6 @@ export function Landing() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
-      <WebetikoBrand />
       {empresa?.banner && (
         <img
           src={empresa.banner}
@@ -23,17 +23,14 @@ export function Landing() {
       <div className="container mx-auto max-w-4xl px-4 py-16">
         <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
           {empresa?.logo ? (
-            <img
-              src={empresa.logo}
-              alt={`Logo de ${empresa.nombre}`}
-              className="mb-8 max-h-32 max-w-64 object-contain"
-            />
+            <ClientLogo empresa={empresa} className="mx-auto mb-3" />
           ) : (
             <div className="mb-8 rounded-full bg-primary p-6 shadow-lg">
               <Shield className="h-16 w-16 text-primary-foreground" />
             </div>
           )}
 
+          <WebetikoBrand className="mb-6" />
           <h1 className="mb-3 text-5xl text-primary">Canal Ético</h1>
           {empresa && <h2 className="mb-6 text-2xl">{empresa.nombre}</h2>}
 

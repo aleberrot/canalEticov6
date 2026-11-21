@@ -1,7 +1,21 @@
 import { useState } from 'react';
 
-export function WebetikoBrand({ inverse = false }: { inverse?: boolean }) {
-  const [failed, setFailed] = useState(false);
-  const logo = import.meta.env.VITE_WEBETIKO_LOGO_URL?.trim();
-  return logo && !failed ? <img src={logo} alt="WEBETIKO" onError={() => setFailed(true)} className="mx-auto mb-6 max-h-16 max-w-56 object-contain" /> : <p className={`mb-6 text-center text-2xl font-bold ${inverse ? 'text-white' : 'text-primary'}`}>WEBETIKO</p>;
+export function WebetikoBrand({ inverse = false, layout = 'horizontal', compact = false, className = '' }: {
+  inverse?: boolean; layout?: 'horizontal' | 'vertical'; compact?: boolean; className?: string;
+}) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const localLogo = layout === 'vertical' ? '/marca/webetiko-vertical.png' : '/marca/webetiko-horizontal.png';
+  const override = import.meta.env.VITE_WEBETIKO_LOGO_URL?.trim();
+  const src = override && override !== failedUrl ? override : localLogo;
+  const size = layout === 'vertical' ? 'max-w-56' : compact ? 'max-w-48' : 'max-w-80';
+  if (failedUrl === localLogo) {
+    return <p className={`text-center font-bold ${inverse ? 'text-white' : 'text-primary'}`}>WEBETIKO.COM</p>;
+  }
+  return (
+    <div className={`mx-auto w-full ${size} ${inverse ? 'rounded-lg bg-white' : ''} ${className}`}>
+      <img src={src} alt="WEBETIKO.COM" width={layout === 'vertical' ? 452 : 660}
+        height={layout === 'vertical' ? 316 : 296} onError={() => setFailedUrl(src)}
+        className="block h-auto w-full object-contain" />
+    </div>
+  );
 }
