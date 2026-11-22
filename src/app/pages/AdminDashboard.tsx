@@ -1,3 +1,4 @@
+import { SucursalAdmin } from '../components/SucursalAdmin';
 import { WebetikoBrand } from '../components/WebetikoBrand';
 import { AportesHistory } from '../components/AportesHistory';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -276,6 +277,7 @@ export function AdminDashboard() {
                 {success}
               </p>
             )}
+            {selectedEmpresaCodigo && <SucursalAdmin key={selectedEmpresaCodigo} empresa={selectedEmpresaCodigo} credentials={credentials} />}
             {loadingData ? (
               <LoadingMessage message="Cargando información de la empresa..." />
             ) : (
@@ -361,6 +363,7 @@ function ReportsTable({ reports, onSelect, onDownload }: ReportsTableProps) {
           <thead className="bg-primary text-primary-foreground">
             <tr>
               <th className="p-4 text-left">Código</th>
+              <th className="p-4 text-left">Sucursal</th>
               <th className="p-4 text-left">Tipo</th>
               <th className="p-4 text-left">Estado</th>
               <th className="p-4 text-left">Fecha</th>
@@ -371,6 +374,7 @@ function ReportsTable({ reports, onSelect, onDownload }: ReportsTableProps) {
             {reports.map((report) => (
               <tr key={report.codigoUnico} className="border-b">
                 <td className="p-4">{report.codigoUnico}</td>
+                <td className="p-4">{report.sucursalNombre || 'No informada'}</td>
                 <td className="p-4">{report.tipoDenuncia}</td>
                 <td className="p-4">{etiquetaEstado(report.estado)}</td>
                 <td className="p-4">{report.createdAt}</td>
@@ -431,7 +435,7 @@ function ReportModal({
           <h3 className="text-lg text-primary">1. Información inicial</h3>
           <dl className="grid gap-4 sm:grid-cols-2">
             {([
-              ['Tipificación', report.delitoTipificacion], ['Código del delito', report.delitoCodigo],
+              ['Sucursal', report.sucursalNombre], ['Tipificación', report.delitoTipificacion], ['Código del delito', report.delitoCodigo],
               ['Detalle del delito', report.delitoDescripcion], ['Descripción', report.descripcion],
               ['Personas involucradas', report.personasInvolucradas], ['Testigos', report.testigos],
               ['Fecha del incidente', report.fechaIncidente], ['Relación con empresa', report.relacionEmpresa],

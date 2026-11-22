@@ -9,6 +9,7 @@ import {
 } from '../services/api';
 
 export interface ReportDraft {
+  codigoSucursal: string;
   tipoDenuncia: 'GENERAL' | 'LEY_KARIN';
   delitoCodigo: string;
   relacionEmpresa: RelacionEmpresa | '';
@@ -25,6 +26,7 @@ export interface ReportDraft {
 }
 
 export const EMPTY_REPORT_DRAFT: ReportDraft = {
+  codigoSucursal: '',
   tipoDenuncia: 'GENERAL',
   delitoCodigo: '',
   relacionEmpresa: '',

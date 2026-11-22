@@ -1,3 +1,4 @@
+import { SucursalSelector, useSucursales } from '../components/SucursalSelector';
 import { ClientLogo } from '../components/ClientLogo';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -61,6 +62,7 @@ function ReportEntry({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KARIN' }
 export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KARIN' }) {
 
   const { empresa, reportDraft, setReportDraft } = usePublicChannel();
+  const sucursales = useSucursales(empresa.codigo);
   const submitting = useRef(false);
   const mounted = useRef(true);
   useEffect(() => {
@@ -120,8 +122,12 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
       return;
     }
 
+    if (!sucursales.ready || (sucursales.items.length > 0 && !sucursales.items.some(s=>s.codigo===reportDraft.codigoSucursal))) {
+      setError('Selecciona una sucursal válida antes de enviar.'); return;
+    }
     const request: CrearDenunciaRequest = {
       codigoEmpresa: empresa.codigo,
+      codigoSucursal: reportDraft.codigoSucursal || undefined,
       tipoDenuncia,
       terminosAceptados: true,
       versionTerminos: TERMS.version,
@@ -218,6 +224,10 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
               <p>Tipo de denuncia</p>
               <p className={INPUT_CLASS}>{isKarin ? 'Denuncia por Ley Karin' : 'Denuncia general'}</p>
             </div>
+            {!sucursales.ready && <div role="status">{sucursales.error || 'Cargando sucursales...'}
+              {sucursales.error && <button type="button" onClick={sucursales.retry}>Volver a intentar</button>}
+            </div>}
+            <SucursalSelector items={sucursales.items} value={reportDraft.codigoSucursal} onChange={v=>updateField('codigoSucursal',v)} />
             <label className="block">
               Relación con la empresa *
               <select
@@ -402,7 +412,7 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
             </label>
             <SimpleCaptcha onVerify={setCaptcha} />
             <button
-              disabled={loading}
+              disabled={loading || !sucursales.ready}
               className="flex w-full justify-center gap-2 rounded bg-primary p-4 text-primary-foreground"
             >
               {loading && <Loader2 className="h-5 w-5 animate-spin" />}

@@ -1,3 +1,4 @@
+import { SucursalSelector } from '../src/app/components/SucursalSelector';
 import { ChannelLoading, UnavailableChannel } from '../src/app/layouts/PublicChannelLayout';
 import { AdminLogin } from '../src/app/pages/AdminLogin';
 import { ReportDetails } from '../src/app/pages/ReportStatus';
@@ -48,3 +49,5 @@ export function renderChannelLoading(slow) {
 export function renderChannelUnavailable(retry) {
   return renderToStaticMarkup(<UnavailableChannel message="No se pudo cargar el canal." onRetry={retry ? () => {} : undefined} />);
 }
+
+export function renderBranches(items,value="") { return renderToStaticMarkup(<SucursalSelector items={items} value={value} onChange={()=>{}} />); }
