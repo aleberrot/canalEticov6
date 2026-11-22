@@ -5,7 +5,7 @@ import { createServer } from 'vite';
 test('flujos separados, términos obligatorios y trazabilidad pública', async (t) => {
   const server = await createServer({ configFile: false, esbuild: { jsx: 'automatic' }, optimizeDeps: { noDiscovery: true, include: [] }, server: { middlewareMode: true, watch: null }, appType: 'custom' });
   try {
-    const { renderPage, renderHistory, renderReportDetails, renderAdminLogin, renderChannelLoading, renderChannelUnavailable } = await server.ssrLoadModule('/tests/public-channel.fixture.tsx');
+    const { renderPage, renderHistory, renderReportDetails, renderAdminLogin, renderChannelLoading, renderChannelUnavailable, renderBranches } = await server.ssrLoadModule('/tests/public-channel.fixture.tsx');
     await t.test('arranque lento informa espera acotada sin declarar inválida la empresa', () => {
       const loading = renderChannelLoading(true);
       assert.match(loading, /90 segundos/);
@@ -15,6 +15,12 @@ test('flujos separados, términos obligatorios y trazabilidad pública', async (
     await t.test('error transitorio permite reintentar y empresa inactiva no propone reintento', () => {
       assert.match(renderChannelUnavailable(true), /Volver a intentar/);
       assert.doesNotMatch(renderChannelUnavailable(false), /Volver a intentar/);
+    });
+    await t.test('selector de sucursales requiere ubicación y conserva selección', () => {
+      const html = renderBranches([{codigo:'chile',nombre:'Mathiesen Chile',activa:true}], 'chile');
+      assert.match(html, /Dónde ocurrió el caso/); assert.match(html, /required/);
+      assert.match(html, /value="chile" selected=""/); assert.match(html, /Mathiesen Chile/);
+      assert.equal(renderBranches([]), '');
     });
     await t.test('landing muestra general y luego Ley Karin', () => {
       const landing = renderPage('/');

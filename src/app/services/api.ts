@@ -13,6 +13,7 @@ export type EstadoDenuncia = 'RECIBIDA' | 'EN_REVISION' | 'CERRADA';
 
 export interface CrearDenunciaRequest {
   codigoEmpresa: string;
+  codigoSucursal?: string;
   tipoDenuncia: TipoDenuncia;
   delitoCodigo: string;
   delitoTipificacion: string;
@@ -50,6 +51,7 @@ export interface AporteDenunciaResponse {
 }
 
 export interface SeguimientoDenunciaResponse {
+  sucursalNombre?: string;
   empresa?: EmpresaPublicResponse;
   codigoUnico: string;
   tipoDenuncia: TipoDenuncia;
@@ -64,6 +66,8 @@ export interface SeguimientoDenunciaResponse {
 }
 
 export interface DenunciaAdminResponse {
+  codigoSucursal?: string;
+  sucursalNombre?: string;
   tieneArchivo?: boolean;
   nombreArchivo?: string;
   codigoUnico: string;
@@ -489,4 +493,24 @@ export async function descargarAporte(
   anchor.click();
   anchor.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export interface Sucursal { codigo: string; nombre: string; activa: boolean }
+export async function obtenerSucursales(empresa: string, credentials?: string, signal?: AbortSignal): Promise<Sucursal[]> {
+  const response = await fetch(`${API_URL}/api/${credentials ? 'admin/' : ''}empresas/${encodeURIComponent(empresa)}/sucursales`, {
+    headers: credentials ? basicAuth(credentials) : undefined, credentials: 'omit', redirect: 'error',
+    signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(90000)]) : AbortSignal.timeout(90000),
+  });
+  if (!response.ok) return handleError(response);
+  const data = await response.json();
+  if (!Array.isArray(data) || data.some(s => typeof s.codigo !== 'string' || typeof s.nombre !== 'string' || typeof s.activa !== 'boolean')) throw new ApiError('Respuesta de sucursales inválida', 502);
+  return data;
+}
+export async function guardarSucursal(empresa: string, sucursal: Sucursal, credentials: string, crear: boolean): Promise<Sucursal> {
+  const response = await fetch(`${API_URL}/api/admin/empresas/${encodeURIComponent(empresa)}/sucursales${crear ? '' : '/' + encodeURIComponent(sucursal.codigo)}`, {
+    method: crear ? 'POST' : 'PUT', headers: {...basicAuth(credentials), 'Content-Type': 'application/json'},
+    body: JSON.stringify(sucursal), credentials: 'omit', redirect: 'error', signal: AbortSignal.timeout(30000),
+  });
+  if (!response.ok) return handleError(response);
+  return response.json();
 }

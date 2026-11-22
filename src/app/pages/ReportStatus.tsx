@@ -316,6 +316,7 @@ export function ReportDetails({ report, password }: {
               label="Tipo de denuncia"
               value={report.tipoDenuncia}
             />
+            <ContentBlock title="Sucursal" content={report.sucursalNombre || 'No informada'} />
             <ContentBlock title="Descripción enviada" content={report.descripcion} />
             <AportesHistory aportes={report.aportes} legacyInfo={report.informacionAdicional}
               onDownload={(aporte) => descargarAporte(report.codigoUnico, aporte, { password })} />
