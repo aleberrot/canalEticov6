@@ -12,7 +12,7 @@ export function WebetikoBrand({ inverse = false, layout = 'horizontal', compact 
     return <p className={`text-center font-bold ${inverse ? 'text-white' : 'text-primary'}`}>WEBETIKO.COM</p>;
   }
   return (
-    <div className={`mx-auto w-full ${size} ${inverse ? 'rounded-lg bg-white' : ''} ${className}`}>
+    <div className={`webetiko-brand ${layout === 'horizontal' ? 'webetiko-horizontal' : ''} mx-auto w-full ${size} ${inverse ? 'rounded-lg bg-white' : ''} ${className}`}>
       <img src={src} alt="WEBETIKO.COM" width={layout === 'vertical' ? 452 : 660}
         height={layout === 'vertical' ? 316 : 296} onError={() => setFailedUrl(src)}
         className="block h-auto w-full object-contain" />

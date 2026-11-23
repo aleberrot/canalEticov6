@@ -13,7 +13,7 @@ export function SucursalAdmin({empresa,credentials}:{empresa:string;credentials:
     } catch {if(mounted.current)setError('No se pudo guardar. El código debe ser único en esta empresa; verifica el listado antes de reintentar.');}
     finally {lock.current=false;if(mounted.current)setBusy(false);}
   }
-  return <section className="my-6 rounded bg-white p-5 shadow"><h2>Sucursales</h2><p>Crear, editar o desactivar. Las denuncias conservan su ubicación original.</p>
+  return <section className="branch-admin"><details><summary>Administrar sucursales</summary><p>Crear, editar o desactivar. Las denuncias conservan su ubicación original.</p>
     {error && <p role="alert">{error}</p>}{!ready && !error && <p>Cargando sucursales...</p>}
     <ul>{items.map(s=><li key={s.codigo} className="my-2">{s.nombre} ({s.codigo}) — {s.activa?'Activa':'Inactiva'} <button disabled={busy} type="button" onClick={()=>{setDraft(s);setEditing(true);}}>Editar</button></li>)}</ul>
     <form className="flex flex-wrap gap-3" onSubmit={e=>{e.preventDefault();void save();}}>
@@ -23,5 +23,5 @@ export function SucursalAdmin({empresa,credentials}:{empresa:string;credentials:
       <button disabled={busy||!ready} className="rounded border p-2">{editing?'Guardar cambios':'Crear sucursal'}</button>
       {editing&&<button type="button" disabled={busy} onClick={()=>{setDraft({codigo:'',nombre:'',activa:true});setEditing(false);}}>Cancelar edición</button>}
     </form>
-  </section>;
+  </details></section>;
 }

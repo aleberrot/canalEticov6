@@ -74,6 +74,11 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [codigo, setCodigo] = useState('');
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    headingRef.current?.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [codigo]);
   const isKarin = tipoDenuncia === 'LEY_KARIN';
   const availableDelitos = isKarin ? DELITOS_LEY_KARIN : DELITOS_GENERALES;
   const delito = availableDelitos.find((option) => option.codigo === reportDraft.delitoCodigo);
@@ -166,12 +171,12 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
 
   if (codigo) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-secondary to-white py-12">
+      <div className="app-surface py-8 sm:py-12">
         <div className="container mx-auto max-w-2xl px-4">
           <div className="rounded-lg bg-white p-8 text-center shadow-lg">
             <ClientLogo empresa={empresa} className="mx-auto mb-6" />
             <CheckCircle className="mx-auto mb-6 h-20 w-20 text-green-600" />
-            <h1 className="mb-2 text-primary">
+            <h1 ref={headingRef} tabIndex={-1} className="mb-2 text-primary">
               Denuncia enviada correctamente
             </h1>
             <p className="mb-4 text-muted-foreground">{empresa.nombre}</p>
@@ -198,7 +203,7 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-secondary to-white py-12">
+    <div className="app-surface py-8 sm:py-12">
       <div className="container mx-auto max-w-3xl px-4">
         <Link
           to={channelBase}
@@ -206,17 +211,17 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
         >
           <ArrowLeft className="h-4 w-4" /> Volver al inicio
         </Link>
-        <div className="rounded-lg bg-white p-8 shadow-lg">
-          <div className="mb-6 flex items-center gap-4">
+        <div className="report-card rounded-lg bg-white p-8">
+          <div className="report-heading mb-6">
             <ClientLogo empresa={empresa} compact />
             <div>
-              <h1 className="text-primary">{isKarin ? 'Enviar denuncia por Ley Karin' : 'Enviar denuncia general'}</h1>
+              <h1 ref={headingRef} tabIndex={-1} className="text-primary">{isKarin ? 'Enviar denuncia por Ley Karin' : 'Enviar denuncia general'}</h1>
               <p className="text-muted-foreground">{empresa.nombre}</p>
             </div>
           </div>
           <form onSubmit={submit} autoComplete="off" className="space-y-6">
             {error && (
-              <div className="flex gap-3 rounded-lg border-2 border-red-200 bg-red-50 p-4">
+              <div role="alert" className="flex gap-3 rounded-lg border-2 border-red-200 bg-red-50 p-4">
                 <AlertCircle className="h-5 w-5 text-red-600" /> {error}
               </div>
             )}
@@ -224,7 +229,7 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
               <p>Tipo de denuncia</p>
               <p className={INPUT_CLASS}>{isKarin ? 'Denuncia por Ley Karin' : 'Denuncia general'}</p>
             </div>
-            {!sucursales.ready && <div role="status">{sucursales.error || 'Cargando sucursales...'}
+            {!sucursales.ready && <div className="branch-status" role="status">{sucursales.error || 'Cargando sucursales...'}
               {sucursales.error && <button type="button" onClick={sucursales.retry}>Volver a intentar</button>}
             </div>}
             <SucursalSelector items={sucursales.items} value={reportDraft.codigoSucursal} onChange={v=>updateField('codigoSucursal',v)} />

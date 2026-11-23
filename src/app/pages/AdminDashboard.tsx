@@ -226,9 +226,9 @@ export function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-secondary">
-      <header className="bg-primary p-6 text-primary-foreground">
-        <WebetikoBrand inverse compact />
-        <div className="container mx-auto flex justify-between">
+      <header className="admin-header bg-primary p-6 text-primary-foreground">
+        <div className="admin-header-inner">
+          <WebetikoBrand inverse compact />
           <h1>Panel Administrativo</h1>
           <button onClick={logout}>Salir</button>
         </div>
@@ -268,12 +268,12 @@ export function AdminDashboard() {
               )}
             </section>
             {error && (
-              <p className="mb-5 rounded border border-red-200 bg-red-50 p-4 text-red-700">
+              <p role="alert" className="mb-5 rounded border border-red-200 bg-red-50 p-4 text-red-700">
                 {error}
               </p>
             )}
             {success && (
-              <p className="mb-5 rounded border border-green-200 bg-green-50 p-4 text-green-700">
+              <p role="status" className="mb-5 rounded border border-green-200 bg-green-50 p-4 text-green-700">
                 {success}
               </p>
             )}
@@ -332,7 +332,7 @@ function StatisticsCards({
   statistics: EstadisticasEmpresaResponse;
 }) {
   return (
-    <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <section className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-3">
       {STATISTICS.map(({ key, label }) => (
         <div key={key} className="rounded-lg bg-white p-5 shadow">
           <p className="text-sm text-gray-600">{label}</p>
@@ -351,7 +351,7 @@ interface ReportsTableProps {
   onDownload: (codigo: string) => Promise<void>;
 }
 
-function ReportsTable({ reports, onSelect, onDownload }: ReportsTableProps) {
+export function ReportsTable({ reports, onSelect, onDownload }: ReportsTableProps) {
   return (
     <section className="overflow-x-auto rounded-lg bg-white shadow">
       {reports.length === 0 ? (
@@ -381,13 +381,17 @@ function ReportsTable({ reports, onSelect, onDownload }: ReportsTableProps) {
                 <td className="p-4">
                   <div className="flex justify-center gap-3">
                     <button
+                      className="grid min-h-11 min-w-11 place-items-center rounded hover:bg-secondary"
                       aria-label={`Ver denuncia ${report.codigoUnico}`}
                       onClick={() => onSelect(report)}
                     >
                       <Eye className="h-4 w-4" />
                     </button>
                     <button
+                      className="grid min-h-11 min-w-11 place-items-center rounded hover:bg-secondary"
                       aria-label={`Descargar archivo de ${report.codigoUnico}`}
+                      disabled={!report.tieneArchivo}
+                      title={report.tieneArchivo ? 'Descargar respaldo inicial' : 'Sin respaldo inicial'}
                       onClick={() => void onDownload(report.codigoUnico)}
                     >
                       <Download className="h-4 w-4" />
@@ -419,10 +423,33 @@ interface ReportModalProps {
 function ReportModal({
   report, credentials, onDownload, onChange, onClose, onChangeStatus, onSave,
 }: ReportModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null;
+    const dialog = dialogRef.current;
+    dialog?.focus();
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { event.preventDefault(); closeRef.current(); }
+      if (event.key !== 'Tab' || !dialog) return;
+      const controls = Array.from(dialog.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href]'))
+        .filter(element => element.getClientRects().length > 0);
+      const first = controls[0], last = controls[controls.length - 1];
+      if (!first) { event.preventDefault(); return; }
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === dialog)) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first.focus();
+      }
+    };
+    dialog?.addEventListener('keydown', handleKey);
+    return () => { dialog?.removeEventListener('keydown', handleKey); if (previous?.isConnected) previous.focus(); };
+  }, []);
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 p-4">
-      <div role="dialog" aria-modal="true" aria-label={`Detalle ${report.codigoUnico}`} className="max-h-[90vh] w-full max-w-3xl space-y-6 overflow-y-auto rounded-lg bg-white p-6">
-        <button onClick={onClose} aria-label="Cerrar detalle" className="float-right">×</button>
+      <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label={`Detalle ${report.codigoUnico}`} className="max-h-[90vh] w-full max-w-3xl space-y-6 overflow-y-auto rounded-lg bg-white p-6">
+        <button onClick={onClose} aria-label="Cerrar detalle" className="float-right min-h-11 min-w-11">×</button>
         <h2 className="text-xl text-primary">{report.codigoUnico} · {report.tipoDenuncia}</h2>
         <label className="block">Estado actual
           <select value={report.estado} onChange={(event) => void onChangeStatus(report, event.target.value as EstadoDenuncia)} className="ml-3 rounded border p-2">

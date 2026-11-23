@@ -2,7 +2,7 @@ import { SucursalSelector } from '../src/app/components/SucursalSelector';
 import { ChannelLoading, UnavailableChannel } from '../src/app/layouts/PublicChannelLayout';
 import { AdminLogin } from '../src/app/pages/AdminLogin';
 import { ReportDetails } from '../src/app/pages/ReportStatus';
-import { AdminDashboard } from '../src/app/pages/AdminDashboard';
+import { ReportsTable, AdminDashboard } from '../src/app/pages/AdminDashboard';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter, Outlet, Route, Routes } from 'react-router';
 import { Landing } from '../src/app/pages/Landing';
@@ -51,3 +51,5 @@ export function renderChannelUnavailable(retry) {
 }
 
 export function renderBranches(items,value="") { return renderToStaticMarkup(<SucursalSelector items={items} value={value} onChange={()=>{}} />); }
+
+export function renderAdminReports(reports) { return renderToStaticMarkup(<ReportsTable reports={reports} onSelect={()=>{}} onDownload={async()=>{}} />); }
