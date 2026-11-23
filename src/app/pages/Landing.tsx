@@ -2,81 +2,47 @@ import { ClientLogo } from '../components/ClientLogo';
 import { CHANNEL_INTRO } from '../data/terms';
 import { TermsDisclosure } from '../components/TermsDisclosure';
 import { WebetikoBrand } from '../components/WebetikoBrand';
-import { Shield } from 'lucide-react';
+import { ArrowRight, FileText, LockKeyhole, Search, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router';
 import { useOptionalPublicChannel } from '../layouts/PublicChannelLayout';
 
 export function Landing() {
-  const channel = useOptionalPublicChannel();
-  const empresa = channel?.empresa;
-  const channelBase = empresa ? `/canal/${empresa.codigo}` : '';
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
-      {empresa?.banner && (
-        <img
-          src={empresa.banner}
-          alt={`Banner de ${empresa.nombre}`}
-          className="h-48 w-full object-cover md:h-64"
-        />
-      )}
-      <div className="container mx-auto max-w-4xl px-4 py-16">
-        <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-          {empresa?.logo ? (
-            <ClientLogo empresa={empresa} className="mx-auto mb-3" />
-          ) : (
-            <div className="mb-8 rounded-full bg-primary p-6 shadow-lg">
-              <Shield className="h-16 w-16 text-primary-foreground" />
-            </div>
-          )}
-
-          <WebetikoBrand className="mb-6" />
-          <h1 className="mb-3 text-5xl text-primary">Canal Ético</h1>
-          {empresa && <h2 className="mb-6 text-2xl">{empresa.nombre}</h2>}
-
-          <p className="mb-4 max-w-2xl text-lg leading-relaxed text-foreground">
-            {empresa ? CHANNEL_INTRO.replaceAll('{empresa}', empresa.nombre) :
-              'Canal seguro y confidencial para reportar conductas inapropiadas e irregularidades.'}
-          </p>
-          <div className="mb-6 max-w-2xl"><TermsDisclosure /></div>
-          <p className="mb-12 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Tu reporte será tratado de manera <strong>confidencial</strong>.
-            La denuncia general permite omitir tus datos personales. Para Ley Karin se requiere identificación.
-          </p>
-
-          <div className="flex w-full max-w-lg flex-col gap-4">
-            {empresa && (
-              <Link
-                to={`${channelBase}/denuncia`}
-                className="rounded-lg bg-primary px-8 py-4 text-center text-primary-foreground shadow-md transition-colors hover:bg-primary/90"
-              >
-                Enviar denuncia general
-              </Link>
-            )}
-            {empresa && (
-              <Link to={`${channelBase}/denuncia-ley-karin`}
-                className="rounded-lg border-2 border-primary bg-secondary px-8 py-4 text-center text-primary shadow-md transition-colors hover:bg-accent">
-                Enviar denuncia por Ley Karin
-              </Link>
-            )}
-            <Link
-              to="/tracking"
-              className="rounded-lg border-2 border-primary bg-white px-8 py-4 text-center text-primary shadow-md transition-colors hover:bg-secondary"
-            >
-              Consultar denuncia
-            </Link>
-          </div>
-
-          <div className="mt-12 text-sm text-muted-foreground">
-            <Link
-              to="/admin"
-              className="underline transition-colors hover:text-primary"
-            >
-              Acceso administrativo
-            </Link>
-          </div>
-        </div>
+  const empresa = useOptionalPublicChannel()?.empresa;
+  const base = empresa ? '/canal/' + empresa.codigo : '';
+  return <div className="app-surface">
+    <header className="channel-header"><div className="channel-header-inner">
+      {empresa?.logo ? <ClientLogo empresa={empresa} compact /> : <span className="platform-label">Canal Ético</span>}
+      <WebetikoBrand compact />
+    </div></header>
+    {empresa?.banner && <img src={empresa.banner} alt={'Banner de ' + empresa.nombre} className="channel-banner" />}
+    <main className="channel-main">
+      <div className="channel-title">
+        <span className="privacy-badge"><ShieldCheck size={16} aria-hidden="true" /> Comunicación confidencial</span>
+        <h1>Canal Ético</h1><p>{empresa?.nombre || 'WEBETIKO'}</p>
       </div>
-    </div>
-  );
+      <div className="channel-grid">
+        <section className="app-card channel-intro" aria-label="Acerca del canal">
+          <h2>Un espacio para informar</h2>
+          <p className="legal-intro">{empresa ? CHANNEL_INTRO.replaceAll('{empresa}', empresa.nombre) : 'Canal seguro y confidencial para reportar conductas inapropiadas e irregularidades.'}</p>
+          <TermsDisclosure />
+          <p className="browser-note">Para un óptimo funcionamiento de la plataforma, se recomienda la utilización del navegador Google Chrome</p>
+        </section>
+        <nav className="app-card channel-actions" aria-label="Acciones del canal">
+          <h2>¿Qué necesitas hacer?</h2>
+          <p className="actions-description">Tu reporte será tratado de manera <strong>confidencial</strong>.</p>
+          {empresa && <>
+            <Link to={base + '/denuncia'} className="channel-action channel-action-primary">
+              <FileText size={21} aria-hidden="true" /><span><strong>Enviar denuncia general</strong><small>Permite omitir tus datos personales</small></span><ArrowRight size={18} aria-hidden="true" />
+            </Link>
+            <Link to={base + '/denuncia-ley-karin'} className="channel-action">
+              <ShieldCheck size={21} aria-hidden="true" /><span><strong>Enviar denuncia por Ley Karin</strong><small>Requiere identificación del denunciante</small></span><ArrowRight size={18} aria-hidden="true" />
+            </Link>
+          </>}
+          <Link to="/tracking" className="channel-action channel-action-tracking"><Search size={21} aria-hidden="true" /><span><strong>Consultar denuncia</strong><small>Usa tu código y contraseña de seguimiento</small></span><ArrowRight size={18} aria-hidden="true" /></Link>
+          <p className="privacy-note"><LockKeyhole size={16} aria-hidden="true" /> Guarda tu código y contraseña para consultar el estado.</p>
+        </nav>
+      </div>
+      <footer className="channel-footer"><span>WEBETIKO · Canal Ético</span><Link to="/admin">Acceso administrativo</Link></footer>
+    </main>
+  </div>;
 }

@@ -7,7 +7,7 @@ export interface DelitoOption{
 export const DELITOS: DelitoOption[] = [
     {
         codigo: "DEL-001",
-        tipificacion: "Cohecho a funcionario ublico nacional o extranjero ",
+        tipificacion: "Cohecho a funcionario público nacional o extranjero ",
         descripcion:
         "Comete este delito quien ofrece o consiente en ofrecer o entregar a un empleado público un beneficio económico, en provecho de éste o de un tercero, para que realice acciones u omisiones con infracción a los deberes de su cargo.",
     },
@@ -25,7 +25,7 @@ export const DELITOS: DelitoOption[] = [
     },
     {
         codigo: "DEL-004",
-        tipificacion: "Receptacion",
+        tipificacion: "Receptación",
         descripcion:
         "El delito lo comete quien tiene en su poder cosas robadas o hurtadas sabiendo su origen ilícito, o quien compra o vende cosas robadas o hurtadas. ",
     },
@@ -37,12 +37,12 @@ export const DELITOS: DelitoOption[] = [
     },
   {
     codigo: "DEL-006",
-    tipificacion: "Proteccción de Bienes de la empresa",
+    tipificacion: "Protección de Bienes de la empresa",
     descripcion: "Es responsabilidad de cada uno proteger los bienes de la empresa incluyendo la información, el mal uso o descuido debe reportarse.",
   },
   {
     codigo: "DEL-007",
-    tipificacion: "Uso de Bienes de la empresa para vienes personales",
+    tipificacion: "Uso de Bienes de la empresa para fines personales",
     descripcion: "Falta a la ética quien hace uso de recursos de la empresa, ya sean personas o elementos materiales para su beneficio particular o de terceros relacionados con él.",
   },
   {
@@ -102,7 +102,7 @@ export const DELITOS: DelitoOption[] = [
   },
   {
     codigo: "DEL-019",
-    tipificacion: "Beneficio economico para empleado publico",
+    tipificacion: "Beneficio económico para empleado publico",
     descripcion: "Comete este delito quien ofrece o consiente en ofrecer o entregar a un empleado público un beneficio económico, en provecho de éste o de un tercero, para que realice acciones u omisiones con infracción a los deberes de su cargo.",
   },
   {
@@ -152,7 +152,7 @@ export const DELITOS: DelitoOption[] = [
   },
   {
     codigo: "DEL-029",
-    tipificacion: "Pesca ilegal de recusros del fondo marino",
+    tipificacion: "Pesca ilegal de recursos del fondo marino",
     descripcion: "Delito  al que realice actividades extractivas en áreas de manejo y explotación de recursos del fondo marino, sin ser titular de los derechos correspondientes.",
   },
   {
@@ -167,8 +167,8 @@ export const DELITOS: DelitoOption[] = [
   },
   {
     codigo: "DEL-032",
-    tipificacion: "Simulación o engaño para la obtención de beneficios maypres (temporal)",
-    descripcion: "Simulación o engaño para la obtención de beneficios maypres (temporal)",
+    tipificacion: "Simulación o engaño para la obtención de beneficios mayores (temporal)",
+    descripcion: "Simulación o engaño para la obtención de beneficios mayores (temporal)",
   },
   {
     codigo: "DEL-033",
@@ -217,7 +217,7 @@ export const DELITOS: DelitoOption[] = [
   },
   {
     codigo: "DEL-042",
-    tipificacion: "Perspectiva de genero",
+    tipificacion: "Perspectiva de género",
     descripcion: "La perspectiva de género se centra especialmente en las diferencias de género en cuanto a estatus y poder, y considera cómo esa discriminación configura las necesidades inmediatas, así como los intereses a largo plazo, de mujeres y hombres.",
   },
   {
@@ -279,3 +279,4 @@ export const obtenerDelitoPorTipificacion = (tipificacion: string): DelitoOption
 export const DELITOS_GENERALES = DELITOS.filter(
   (delito) => !DELITOS_LEY_KARIN.some((karin) => karin.codigo === delito.codigo),
 );
+

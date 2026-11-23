@@ -12,6 +12,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import {
   agregarInformacionAdicional,
   descargarAporte,
+  etiquetaEstado,
   MAX_ARCHIVO_BYTES,
   consultarDenuncia,
   SeguimientoDenunciaResponse,
@@ -125,9 +126,9 @@ function ReportStatusSession() {
 
   if (error || !report) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-secondary to-white py-12">
+      <div className="app-surface py-8 sm:py-12">
         <div className="container mx-auto max-w-2xl px-4">
-          <div className="rounded-lg bg-white p-8 shadow-lg">
+          <div className="report-card rounded-lg bg-white p-8">
             <div className="mb-6 flex items-start gap-3 rounded-lg border-2 border-red-200 bg-red-50 p-4">
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
               <div>
@@ -150,7 +151,7 @@ function ReportStatusSession() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-secondary to-white py-12">
+    <div className="app-surface py-8 sm:py-12">
       <div className="container mx-auto max-w-3xl px-4">
         <Link
           to="/tracking"
@@ -158,7 +159,7 @@ function ReportStatusSession() {
         >
           <ArrowLeft className="h-4 w-4" /> Volver a consulta
         </Link>
-        <div className="rounded-lg bg-white p-8 shadow-lg">
+        <div className="report-card rounded-lg bg-white p-8">
           <ReportDetails report={report} password={password!} />
           {report.tipoDenuncia === 'GENERAL' && (
             <form
@@ -288,7 +289,7 @@ export function ReportDetails({ report, password }: {
   return (
     <>
       {report.empresa && <ClientLogo empresa={report.empresa} className="mb-6" />}
-          <header className="mb-6 flex items-start justify-between border-b border-border pb-6">
+          <header className="mb-6 flex flex-wrap gap-3 items-start justify-between border-b border-border pb-6">
             <div>
               <h1 className="mb-2 text-primary">Estado de Denuncia</h1>
               <p className="text-muted-foreground">
@@ -298,7 +299,7 @@ export function ReportDetails({ report, password }: {
             <span
               className={`rounded-full border px-4 py-2 ${getStatusColor(report.estado)}`}
             >
-              {report.estado}
+              {etiquetaEstado(report.estado)}
             </span>
           </header>
           <div className="space-y-6">
@@ -314,7 +315,7 @@ export function ReportDetails({ report, password }: {
             <InfoRow
               icon={<FileText className="mt-1 h-5 w-5 text-primary" />}
               label="Tipo de denuncia"
-              value={report.tipoDenuncia}
+              value={report.tipoDenuncia === 'LEY_KARIN' ? 'Ley Karin' : 'General'}
             />
             <ContentBlock title="Sucursal" content={report.sucursalNombre || 'No informada'} />
             <ContentBlock title="Descripción enviada" content={report.descripcion} />

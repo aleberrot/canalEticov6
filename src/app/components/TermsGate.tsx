@@ -11,8 +11,8 @@ export function TermsGate({ tipoDenuncia, onAccept }: {
   const { empresa } = usePublicChannel();
   const [checked, setChecked] = useState(false);
   return (
-    <div className="min-h-screen bg-gradient-to-b from-secondary to-white px-4 py-12">
-      <div className="mx-auto max-w-3xl space-y-6 rounded-lg bg-white p-8 shadow-lg">
+    <div className="app-surface px-4 py-8 sm:py-12">
+      <div className="mx-auto max-w-3xl space-y-6 app-card report-card">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-4">
         <Link to={`/canal/${empresa.codigo}`} className="text-primary underline">Volver al inicio</Link>
@@ -21,7 +21,7 @@ export function TermsGate({ tipoDenuncia, onAccept }: {
           <ClientLogo empresa={empresa} compact />
         </header>
         <p>{empresa.nombre}</p>
-        <p>{CHANNEL_INTRO.replaceAll('{empresa}', empresa.nombre)}</p>
+        <p className="legal-intro">{CHANNEL_INTRO.replaceAll('{empresa}', empresa.nombre)}</p>
         <p>Por favor coloque la mayor cantidad de datos posibles al realizar su reporte.</p>
         <TermsDisclosure />
         <form className="space-y-6" onSubmit={(event) => { event.preventDefault(); if (checked) onAccept(); }}>

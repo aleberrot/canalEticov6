@@ -10,7 +10,8 @@
       "audit-essential-fixes-20261121": false,
       "feat-mathiesen-branding-20261121": false,
       "fix-emp01-startup-20261121": false,
-      "feat-sucursales-ppt-20261122": false
+      "feat-sucursales-ppt-20261122": false,
+      "fix-audit-ui-20261123": false
     }
   }
 }

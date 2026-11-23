@@ -1,0 +1,38 @@
+.app-surface{min-height:100vh;background:linear-gradient(160deg,#f3f5fb,#f9fafc 55%,#edf4f2)}
+.channel-header{background:white;border-bottom:1px solid #e5e9f1}
+.channel-header-inner{max-width:1120px;margin:auto;padding:22px 28px;display:flex;align-items:center;justify-content:space-between;gap:32px}
+.channel-header-inner>div{margin:0}.channel-header-inner [data-company-brand]{max-width:216px}.channel-header-inner .webetiko-brand{max-width:218px}
+.webetiko-horizontal{aspect-ratio:5/1;overflow:hidden}.webetiko-horizontal img{width:100%;height:100%;object-fit:cover;object-position:center}
+.channel-banner{display:block;width:100%;max-height:190px;object-fit:cover}.channel-main{width:min(1120px,100%);margin:auto;padding:40px 28px 24px}
+.channel-title{margin-bottom:28px}.channel-title h1{color:#24365d;font-size:clamp(2rem,4vw,2.7rem);font-weight:700;line-height:1.2;letter-spacing:-.035em;margin:14px 0 8px}.channel-title>p{color:#526179;font-size:1.1rem}
+.privacy-badge{display:inline-flex;align-items:center;gap:7px;color:#3d6557;background:#e6f1eb;border:1px solid #d2e5d9;border-radius:100px;padding:6px 11px;font-size:.78rem;font-weight:600}
+.channel-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:start;gap:24px}
+.app-card{min-width:0;border:1px solid #e1e6ef;background:white;border-radius:18px;padding:30px;box-shadow:0 8px 28px #24365d06}
+.app-card h2{color:#24365d;font-size:1.15rem;font-weight:650;line-height:1.45;margin-bottom:14px}
+.legal-intro{color:#46546a;font-size:.92rem;line-height:1.85;overflow-wrap:anywhere}.channel-intro details{margin-top:22px}
+.browser-note{margin-top:18px;color:#657187;font-size:.76rem;line-height:1.6}.actions-description{color:#657187;font-size:.88rem;line-height:1.7;margin-bottom:20px}
+.channel-action{display:flex;align-items:center;gap:12px;min-width:0;min-height:88px;margin-top:12px;padding:17px;border-radius:12px;border:1px solid #d9e0eb;color:#24365d;background:white;text-decoration:none;transition:background .15s,box-shadow .15s}
+.channel-action>svg{flex-shrink:0}.channel-action>span{flex:1;min-width:0}.channel-action strong{display:block;font-size:.93rem;font-weight:650;line-height:1.5}.channel-action small{display:block;margin-top:4px;font-size:.76rem;line-height:1.5;opacity:.85}
+.channel-action:hover{background:#f5f6fb;box-shadow:0 3px 10px #24365d0c}.channel-action-primary{color:white;background:#243e78;border-color:#243e78}.channel-action-primary:hover{background:#1b3060}.channel-action-tracking{background:#f7f9fc}
+.privacy-note{display:flex;gap:8px;align-items:flex-start;color:#657187;font-size:.76rem;line-height:1.6;margin-top:22px}.privacy-note svg{flex-shrink:0;margin-top:2px}
+.channel-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:24px;color:#657187;font-size:.78rem}.channel-footer a{text-decoration:underline;text-underline-offset:3px}.platform-label{color:#24365d;font-weight:700}
+.report-card{border:1px solid #e1e6ef;border-radius:18px;box-shadow:0 8px 28px #24365d06}.report-heading{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-bottom:22px;border-bottom:1px solid #e5e9f1}
+.report-heading [data-company-brand]{order:2;max-width:160px}.report-heading h1{font-size:1.55rem;font-weight:650;line-height:1.35}.report-heading p{font-size:.88rem;margin-top:6px}
+.report-card form>label{display:block;font-size:.9rem;font-weight:550}.report-card input:not([type=checkbox]),.report-card select,.report-card textarea{margin-top:7px}
+.branch-field{display:block;border:1px solid #dae1ed;border-radius:12px;background:#f7f9fc;padding:16px}.branch-field select{width:100%;min-width:0;max-width:100%;margin-top:8px;padding:12px;background:white;border:1px solid #cbd5e1;border-radius:8px}
+.branch-status{border:1px solid #d9e0eb;background:#f7f9fc;padding:14px;border-radius:10px;font-size:.88rem}.branch-status button{display:block;margin-top:8px;text-decoration:underline;color:#243e78}
+.terms-disclosure{border:1px solid #dde3ee;background:#f8fafc;border-radius:10px;padding:15px;font-size:.88rem}.terms-disclosure summary{font-weight:600;text-underline-offset:3px}.terms-disclosure p{line-height:1.8;overflow-wrap:anywhere}.terms-disclosure button{min-height:40px}
+.admin-header .webetiko-brand{margin:0;padding:4px 9px}.admin-header-inner{max-width:1280px;margin:auto;display:flex;align-items:center;gap:24px;justify-content:space-between}.admin-header-inner h1{flex:1;font-size:1.2rem}.admin-header-inner button{border:1px solid #ffffff60;border-radius:8px;padding:8px 16px}
+.branch-admin{margin:24px 0;border:1px solid #e1e6ef;border-radius:14px;background:white;padding:24px}.branch-admin details>summary{cursor:pointer;color:#24365d;font-weight:650}.branch-admin ul{margin:18px 0;max-height:280px;overflow-y:auto;border-top:1px solid #e5e9f1}
+.branch-admin li{display:flex;gap:12px;align-items:center;justify-content:space-between;border-bottom:1px solid #e5e9f1;padding:10px 0;font-size:.85rem}.branch-admin li button{flex-shrink:0;border:1px solid #d9e0eb;border-radius:7px;padding:6px 12px}
+.branch-admin form{border-top:1px solid #e5e9f1;padding-top:18px;align-items:end}.branch-admin form label{min-width:0;font-size:.86rem}.branch-admin form input:not([type=checkbox]){width:100%}
+#root input,#root select,#root textarea{min-width:0;max-width:100%}#root input[type=checkbox]{accent-color:#243e78;width:18px;height:18px;flex-shrink:0}
+#root button:disabled{cursor:not-allowed;opacity:.55}#root :is(a,button,input,select,textarea,summary):focus-visible{outline:3px solid #7a63bb;outline-offset:3px}
+@media(max-width:760px){
+.channel-header-inner{padding:18px 20px;gap:24px}.channel-header-inner [data-company-brand],.channel-header-inner .webetiko-brand{max-width:155px}
+.channel-main{padding:28px 20px 24px}.channel-grid{grid-template-columns:minmax(0,1fr);gap:20px}.channel-actions{order:-1}.app-card{padding:23px}
+.channel-action{min-height:82px;padding:14px}.channel-title{margin-bottom:24px}.report-heading{flex-direction:column;align-items:flex-start;gap:16px}.report-heading [data-company-brand]{order:0}.report-card{padding:22px!important}
+.admin-header-inner{flex-wrap:wrap;gap:14px}.admin-header-inner h1{flex-basis:calc(100% - 80px)}.admin-header-inner .webetiko-brand{max-width:180px}
+.branch-admin{padding:18px}.branch-admin form>label{flex-basis:100%}#root :is(input:not([type=checkbox]),select,textarea){font-size:16px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation-duration:.01ms!important}}

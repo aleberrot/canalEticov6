@@ -5,7 +5,7 @@ import { createServer } from 'vite';
 test('flujos separados, términos obligatorios y trazabilidad pública', async (t) => {
   const server = await createServer({ configFile: false, esbuild: { jsx: 'automatic' }, optimizeDeps: { noDiscovery: true, include: [] }, server: { middlewareMode: true, watch: null }, appType: 'custom' });
   try {
-    const { renderPage, renderHistory, renderReportDetails, renderAdminLogin, renderChannelLoading, renderChannelUnavailable, renderBranches } = await server.ssrLoadModule('/tests/public-channel.fixture.tsx');
+    const { renderPage, renderHistory, renderReportDetails, renderAdminLogin, renderChannelLoading, renderChannelUnavailable, renderBranches, renderAdminReports } = await server.ssrLoadModule('/tests/public-channel.fixture.tsx');
     await t.test('arranque lento informa espera acotada sin declarar inválida la empresa', () => {
       const loading = renderChannelLoading(true);
       assert.match(loading, /90 segundos/);
@@ -21,6 +21,19 @@ test('flujos separados, términos obligatorios y trazabilidad pública', async (
       assert.match(html, /Dónde ocurrió el caso/); assert.match(html, /required/);
       assert.match(html, /value="chile" selected=""/); assert.match(html, /Mathiesen Chile/);
       assert.equal(renderBranches([]), '');
+    });
+    await t.test('administración deshabilita descarga cuando no existe respaldo', () => {
+      const html = renderAdminReports([
+        {codigoUnico:'SIN-ARCHIVO',tipoDenuncia:'GENERAL',estado:'RECIBIDA',createdAt:'2026-11-23',tieneArchivo:false},
+        {codigoUnico:'CON-ARCHIVO',tipoDenuncia:'GENERAL',estado:'RECIBIDA',createdAt:'2026-11-23',tieneArchivo:true},
+      ]);
+      assert.match(html,/aria-label="Descargar archivo de SIN-ARCHIVO" disabled=""/);
+      assert.doesNotMatch(html,/aria-label="Descargar archivo de CON-ARCHIVO" disabled/);
+    });
+    await t.test('seguimiento usa estados y tipos legibles para el denunciante', () => {
+      const html = renderReportDetails({codigoUnico:'DEN-PRUEBA',tipoDenuncia:'LEY_KARIN',estado:'EN_REVISION',createdAt:'2026-11-23',descripcion:'Ejemplo sintético',aportes:[]});
+      assert.match(html,/En revisión/); assert.match(html,/Ley Karin/);
+      assert.doesNotMatch(html,/EN_REVISION|LEY_KARIN/);
     });
     await t.test('landing muestra general y luego Ley Karin', () => {
       const landing = renderPage('/');

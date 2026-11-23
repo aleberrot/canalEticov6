@@ -43,7 +43,7 @@ export function Tracking() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-secondary to-white py-12">
+    <div className="app-surface py-8 sm:py-12">
       <div className="container mx-auto px-4 max-w-2xl">
         <Link 
           to="/"
@@ -53,7 +53,7 @@ export function Tracking() {
           Volver al inicio
         </Link>
         
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="app-card report-card">
           <WebetikoBrand className="mb-4" />
           <div className="flex items-center gap-3 mb-6">
             <div className="bg-primary/10 p-3 rounded-lg">
@@ -97,7 +97,7 @@ export function Tracking() {
             </div>
             
             {error && (
-              <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 flex items-start gap-3">
+              <div role="alert" className="bg-red-50 border-2 border-red-200 rounded-lg p-4 flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-red-800 font-medium">Error</p>
