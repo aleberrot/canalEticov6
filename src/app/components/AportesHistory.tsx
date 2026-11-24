@@ -1,3 +1,4 @@
+import { formatBusinessInstant } from '../services/businessTime';
 import { useState } from 'react';
 import { Download } from 'lucide-react';
 import { AporteDenunciaResponse } from '../services/api';
@@ -22,7 +23,7 @@ export function AportesHistory({ aportes, legacyInfo, onDownload }: {
     {items.map((aporte, index) => <article key={aporte.id} className="space-y-3 rounded-lg border border-border bg-secondary/40 p-5">
       <h3 className="font-medium">{aporte.legacy ? 'Registro anterior' : `Aporte #${index + (items[0]?.legacy ? 0 : 1)}`}</h3>
       <p className="text-sm text-muted-foreground">{aporte.createdAt
-        ? new Date(aporte.createdAt).toLocaleString('es-CL')
+        ? formatBusinessInstant(aporte.createdAt)
         : 'Fecha y hora no disponibles (registro anterior)'}</p>
       {aporte.informacion && <p className="whitespace-pre-wrap break-words">{aporte.informacion}</p>}
       {aporte.tieneArchivo && <button type="button" disabled={downloading !== null} onClick={() => void download(aporte)}

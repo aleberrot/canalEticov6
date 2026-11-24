@@ -1,3 +1,5 @@
+import { trackingRoute } from '../services/navigation';
+import { WebetikoBrand } from '../components/WebetikoBrand';
 import { SucursalSelector, useSucursales } from '../components/SucursalSelector';
 import { ClientLogo } from '../components/ClientLogo';
 import { useEffect, useRef, useState } from 'react';
@@ -174,7 +176,7 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
       <div className="app-surface py-8 sm:py-12">
         <div className="container mx-auto max-w-2xl px-4">
           <div className="rounded-lg bg-white p-8 text-center shadow-lg">
-            <ClientLogo empresa={empresa} className="mx-auto mb-6" />
+            <WebetikoBrand compact className="mb-4" /><ClientLogo empresa={empresa} className="mx-auto mb-6" />
             <CheckCircle className="mx-auto mb-6 h-20 w-20 text-green-600" />
             <h1 ref={headingRef} tabIndex={-1} className="mb-2 text-primary">
               Denuncia enviada correctamente
@@ -187,10 +189,10 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
                 to={channelBase}
                 className="rounded border border-primary px-4 py-3 text-primary"
               >
-                Volver al canal
+                Inicio
               </Link>
               <Link
-                to="/tracking"
+                to={trackingRoute(empresa.codigo)}
                 className="rounded bg-primary p-3 text-primary-foreground"
               >
                 Consultar estado
@@ -209,11 +211,11 @@ export function ReportForm({ tipoDenuncia }: { tipoDenuncia: 'GENERAL' | 'LEY_KA
           to={channelBase}
           className="mb-8 inline-flex items-center gap-2 text-primary"
         >
-          <ArrowLeft className="h-4 w-4" /> Volver al inicio
+          <ArrowLeft className="h-4 w-4" /> Inicio
         </Link>
         <div className="report-card rounded-lg bg-white p-8">
           <div className="report-heading mb-6">
-            <ClientLogo empresa={empresa} compact />
+            <WebetikoBrand compact className="mb-4" /><ClientLogo empresa={empresa} compact />
             <div>
               <h1 ref={headingRef} tabIndex={-1} className="text-primary">{isKarin ? 'Enviar denuncia por Ley Karin' : 'Enviar denuncia general'}</h1>
               <p className="text-muted-foreground">{empresa.nombre}</p>

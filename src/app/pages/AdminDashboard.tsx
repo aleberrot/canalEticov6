@@ -1,9 +1,11 @@
+import { channelHome, adminRoute } from '../services/navigation';
+import { formatBusinessDate } from '../services/businessTime';
 import { SucursalAdmin } from '../components/SucursalAdmin';
 import { WebetikoBrand } from '../components/WebetikoBrand';
 import { AportesHistory } from '../components/AportesHistory';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Download, Eye, Loader2, RefreshCw } from 'lucide-react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import {
   actualizarDetalleAdmin,
   actualizarEstadoDenuncia,
@@ -43,6 +45,8 @@ const STATISTICS: Array<{
 
 export function AdminDashboard() {
   const navigate = useNavigate();
+  const [search] = useSearchParams();
+  const preferredCompany = search.get('empresa');
   const requestId = useRef(0);
   const [credentials, setCredentials] = useState('');
   const [empresas, setEmpresas] = useState<EmpresaAdminResponse[]>([]);
@@ -58,8 +62,8 @@ export function AdminDashboard() {
 
   const closeInvalidSession = useCallback(() => {
     localStorage.removeItem('adminCredentials');
-    navigate('/admin', { replace: true, state: { sessionExpired: true } });
-  }, [navigate]);
+    navigate(adminRoute(preferredCompany), { replace: true, state: { sessionExpired: true } });
+  }, [navigate, preferredCompany]);
 
   const handleRequestError = useCallback(
     (requestError: unknown, message: string) => {
@@ -120,7 +124,7 @@ export function AdminDashboard() {
     const auth = localStorage.getItem('adminCredentials');
 
     if (!auth) {
-      navigate('/admin', { replace: true });
+      navigate(adminRoute(preferredCompany), { replace: true });
       return;
     }
 
@@ -132,7 +136,7 @@ export function AdminDashboard() {
         setEmpresas(availableEmpresas);
 
         if (availableEmpresas.length > 0) {
-          const firstCodigo = availableEmpresas[0].codigo;
+          const firstCodigo = availableEmpresas.find(e => e.codigo === preferredCompany)?.codigo || availableEmpresas[0].codigo;
           setSelectedEmpresaCodigo(firstCodigo);
           await loadEmpresaData(firstCodigo, auth);
         }
@@ -147,7 +151,7 @@ export function AdminDashboard() {
     };
 
     void loadEmpresas();
-  }, [handleRequestError, loadEmpresaData, navigate]);
+  }, [handleRequestError, loadEmpresaData, navigate, preferredCompany]);
 
   const selectedEmpresa = empresas.find(
     (empresa) => empresa.codigo === selectedEmpresaCodigo,
@@ -221,7 +225,7 @@ export function AdminDashboard() {
 
   const logout = () => {
     localStorage.removeItem('adminCredentials');
-    navigate('/admin', { replace: true });
+    navigate(adminRoute(selectedEmpresaCodigo), { replace: true });
   };
 
   return (
@@ -230,6 +234,7 @@ export function AdminDashboard() {
         <div className="admin-header-inner">
           <WebetikoBrand inverse compact />
           <h1>Panel Administrativo</h1>
+          <Link to={channelHome(selectedEmpresaCodigo)} className="underline">Inicio</Link>
           <button onClick={logout}>Salir</button>
         </div>
       </header>
@@ -377,7 +382,7 @@ export function ReportsTable({ reports, onSelect, onDownload }: ReportsTableProp
                 <td className="p-4">{report.sucursalNombre || 'No informada'}</td>
                 <td className="p-4">{report.tipoDenuncia}</td>
                 <td className="p-4">{etiquetaEstado(report.estado)}</td>
-                <td className="p-4">{report.createdAt}</td>
+                <td className="p-4">{formatBusinessDate(report.createdAt, report.createdAtInstant)}</td>
                 <td className="p-4">
                   <div className="flex justify-center gap-3">
                     <button
@@ -467,7 +472,7 @@ function ReportModal({
               ['Personas involucradas', report.personasInvolucradas], ['Testigos', report.testigos],
               ['Fecha del incidente', report.fechaIncidente], ['Relación con empresa', report.relacionEmpresa],
               ['Nombre del denunciante', report.nombreDenunciante], ['Correo', report.emailDenunciante],
-              ['Teléfono', report.telefonoDenunciante], ['Fecha de creación', report.createdAt],
+              ['Teléfono', report.telefonoDenunciante], ['Fecha de creación', formatBusinessDate(report.createdAt, report.createdAtInstant)],
               ['Última actualización', report.updatedAt],
             ] as const).map(([label, value]) => <div key={label}>
               <dt className="text-sm text-muted-foreground">{label}</dt>

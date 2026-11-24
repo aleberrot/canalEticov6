@@ -1,3 +1,4 @@
+import { channelHome } from '../services/navigation';
 import { WebetikoBrand } from '../components/WebetikoBrand';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
@@ -11,6 +12,7 @@ interface AdminLoginLocationState {
 export function AdminLogin() {
   const navigate = useNavigate();
   const location = useLocation();
+  const company = new URLSearchParams(location.search).get('empresa');
   const locationState = location.state as AdminLoginLocationState | null;
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -46,7 +48,7 @@ export function AdminLogin() {
   return (
     <div className="app-surface py-8 sm:py-12">
       <div className="container mx-auto max-w-md px-4">
-        <Link to="/">Volver al inicio</Link>
+        <Link to={channelHome(company)}>Inicio</Link>
         <div className="mt-6 app-card report-card">
           <WebetikoBrand layout="vertical" className="mb-4" />
           <h1 className="text-primary">Panel Administrativo</h1>

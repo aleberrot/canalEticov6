@@ -61,6 +61,8 @@ export interface SeguimientoDenunciaResponse {
   informacionAdicional?: string;
   aportes?: AporteDenunciaResponse[];
   conclusionesMedidas?: string;
+  createdAtInstant?: string | null;
+  updatedAtInstant?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -90,6 +92,8 @@ export interface DenunciaAdminResponse {
   conclusionesMedidas?: string;
   informacionAdicional?: string;
   aportes?: AporteDenunciaResponse[];
+  createdAtInstant?: string | null;
+  updatedAtInstant?: string | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -1,3 +1,4 @@
+import { trackingRoute, adminRoute } from '../services/navigation';
 import { ClientLogo } from '../components/ClientLogo';
 import { CHANNEL_INTRO } from '../data/terms';
 import { TermsDisclosure } from '../components/TermsDisclosure';
@@ -11,14 +12,14 @@ export function Landing() {
   const base = empresa ? '/canal/' + empresa.codigo : '';
   return <div className="app-surface">
     <header className="channel-header"><div className="channel-header-inner">
-      {empresa?.logo ? <ClientLogo empresa={empresa} compact /> : <span className="platform-label">Canal Ético</span>}
+      {empresa?.logo ? <ClientLogo empresa={empresa} compact /> : <span className="platform-label">WEBETICO</span>}
       <WebetikoBrand compact />
     </div></header>
     {empresa?.banner && <img src={empresa.banner} alt={'Banner de ' + empresa.nombre} className="channel-banner" />}
     <main className="channel-main">
       <div className="channel-title">
         <span className="privacy-badge"><ShieldCheck size={16} aria-hidden="true" /> Comunicación confidencial</span>
-        <h1>Canal Ético</h1><p>{empresa?.nombre || 'WEBETIKO'}</p>
+        <h1>WEBETICO</h1><p>Canal de Denuncias</p>{empresa && <p className="text-sm">{empresa.nombre}</p>}
       </div>
       <div className="channel-grid">
         <section className="app-card channel-intro" aria-label="Acerca del canal">
@@ -38,11 +39,11 @@ export function Landing() {
               <ShieldCheck size={21} aria-hidden="true" /><span><strong>Enviar denuncia por Ley Karin</strong><small>Requiere identificación del denunciante</small></span><ArrowRight size={18} aria-hidden="true" />
             </Link>
           </>}
-          <Link to="/tracking" className="channel-action channel-action-tracking"><Search size={21} aria-hidden="true" /><span><strong>Consultar denuncia</strong><small>Usa tu código y contraseña de seguimiento</small></span><ArrowRight size={18} aria-hidden="true" /></Link>
+          <Link to={trackingRoute(empresa?.codigo)} className="channel-action channel-action-tracking"><Search size={21} aria-hidden="true" /><span><strong>Consultar denuncia</strong><small>Usa tu código y contraseña de seguimiento</small></span><ArrowRight size={18} aria-hidden="true" /></Link>
           <p className="privacy-note"><LockKeyhole size={16} aria-hidden="true" /> Guarda tu código y contraseña para consultar el estado.</p>
         </nav>
       </div>
-      <footer className="channel-footer"><span>WEBETIKO · Canal Ético</span><Link to="/admin">Acceso administrativo</Link></footer>
+      <footer className="channel-footer"><span>WEBETIKO · Canal de Denuncias</span><Link to={adminRoute(empresa?.codigo)}>Acceso administrativo</Link></footer>
     </main>
   </div>;
 }

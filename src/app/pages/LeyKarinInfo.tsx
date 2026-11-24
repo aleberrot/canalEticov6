@@ -14,7 +14,7 @@ export function LeyKarinInfo() {
           className="inline-flex items-center gap-2 text-primary hover:underline mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
-          Volver al inicio
+          Inicio
         </Link>
         
         <div className="bg-white rounded-lg shadow-lg p-8 md:p-12">
@@ -156,7 +156,7 @@ export function LeyKarinInfo() {
                 to={channelBase}
                 className="flex-1 bg-white text-primary py-4 px-6 rounded-lg border-2 border-primary hover:bg-secondary transition-colors text-center"
               >
-                Volver al inicio
+                Inicio
               </Link>
               
               <Link 

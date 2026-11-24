@@ -4,7 +4,7 @@ export function WebetikoBrand({ inverse = false, layout = 'horizontal', compact 
   inverse?: boolean; layout?: 'horizontal' | 'vertical'; compact?: boolean; className?: string;
 }) {
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
-  const localLogo = layout === 'vertical' ? '/marca/webetiko-vertical.png' : '/marca/webetiko-horizontal.png';
+  const localLogo = '/marca/webetiko-2026.webp';
   const override = import.meta.env.VITE_WEBETIKO_LOGO_URL?.trim();
   const src = override && override !== failedUrl ? override : localLogo;
   const size = layout === 'vertical' ? 'max-w-56' : compact ? 'max-w-48' : 'max-w-80';
@@ -13,8 +13,8 @@ export function WebetikoBrand({ inverse = false, layout = 'horizontal', compact 
   }
   return (
     <div className={`webetiko-brand ${layout === 'horizontal' ? 'webetiko-horizontal' : ''} mx-auto w-full ${size} ${inverse ? 'rounded-lg bg-white' : ''} ${className}`}>
-      <img src={src} alt="WEBETIKO.COM" width={layout === 'vertical' ? 452 : 660}
-        height={layout === 'vertical' ? 316 : 296} onError={() => setFailedUrl(src)}
+      <img src={src} alt="WEBETIKO — Grupo Conthrol Tech" width={2172}
+        height={724} onError={() => setFailedUrl(src)}
         className="block h-auto w-full object-contain" />
     </div>
   );
