@@ -47,6 +47,7 @@ export function AdminDashboard() {
   const navigate = useNavigate();
   const [search] = useSearchParams();
   const preferredCompany = search.get('empresa');
+  const activeEmpresaCodigo = useRef(preferredCompany);
   const requestId = useRef(0);
   const [credentials, setCredentials] = useState('');
   const [empresas, setEmpresas] = useState<EmpresaAdminResponse[]>([]);
@@ -62,7 +63,7 @@ export function AdminDashboard() {
 
   const closeInvalidSession = useCallback(() => {
     localStorage.removeItem('adminCredentials');
-    navigate(adminRoute(preferredCompany), { replace: true, state: { sessionExpired: true } });
+    navigate(adminRoute(activeEmpresaCodigo.current || preferredCompany), { replace: true, state: { sessionExpired: true } });
   }, [navigate, preferredCompany]);
 
   const handleRequestError = useCallback(
@@ -137,6 +138,7 @@ export function AdminDashboard() {
 
         if (availableEmpresas.length > 0) {
           const firstCodigo = availableEmpresas.find(e => e.codigo === preferredCompany)?.codigo || availableEmpresas[0].codigo;
+          activeEmpresaCodigo.current = firstCodigo;
           setSelectedEmpresaCodigo(firstCodigo);
           await loadEmpresaData(firstCodigo, auth);
         }
@@ -158,6 +160,7 @@ export function AdminDashboard() {
   );
 
   const selectEmpresa = (codigoEmpresa: string) => {
+    activeEmpresaCodigo.current = codigoEmpresa;
     setSelectedEmpresaCodigo(codigoEmpresa);
     void loadEmpresaData(codigoEmpresa, credentials);
   };
