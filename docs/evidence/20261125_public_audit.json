@@ -12,7 +12,7 @@
             "loaded": true
           },
           {
-            "alt": "WEBETIKO â€” Grupo Conthrol Tech",
+            "alt": "WEBETIKO — Grupo Conthrol Tech",
             "loaded": true
           }
         ],
@@ -22,11 +22,11 @@
             "href": "/canal/mathiesen/denuncia"
           },
           {
-            "text": "Enviar denuncia por Ley KarinRequiere identificaciÃ³n del denunciante",
+            "text": "Enviar denuncia por Ley KarinRequiere identificación del denunciante",
             "href": "/canal/mathiesen/denuncia-ley-karin"
           },
           {
-            "text": "Consultar denunciaUsa tu cÃ³digo y contraseÃ±a de seguimiento",
+            "text": "Consultar denunciaUsa tu código y contraseña de seguimiento",
             "href": "/tracking?empresa=mathiesen"
           },
           {
@@ -36,7 +36,7 @@
         ]
       },
       {
-        "page": "Mathiesen mÃ³vil 375px",
+        "page": "Mathiesen móvil 375px",
         "overflow": false
       },
       {
@@ -53,13 +53,13 @@
         "page": "Seguimiento",
         "url": "https://canaletico.absoftwareworks.com/tracking?empresa=mathiesen",
         "passwordEmpty": true,
-        "body": "Inicio\nConsultar Denuncia\n\nVerifica el estado de tu reporte\n\nCÃ³digo de denuncia\nContraseÃ±a\nConsultar estado\n\nNota: Necesitas el cÃ³digo de seguimiento que recibiste al enviar tu denuncia y la contraseÃ±a que creaste en ese momento."
+        "body": "Inicio\nConsultar Denuncia\n\nVerifica el estado de tu reporte\n\nCódigo de denuncia\nContraseña\nConsultar estado\n\nNota: Necesitas el código de seguimiento que recibiste al enviar tu denuncia y la contraseña que creaste en ese momento."
       },
       {
-        "page": "AdministraciÃ³n",
+        "page": "Administración",
         "url": "https://canaletico.absoftwareworks.com/admin?empresa=mathiesen",
         "passwordEmpty": true,
-        "body": "Inicio\nPanel Administrativo\nUsuario\nContraseÃ±a\nIniciar sesiÃ³n"
+        "body": "Inicio\nPanel Administrativo\nUsuario\nContraseña\nIniciar sesión"
       }
     ],
     "errors": [],
@@ -164,7 +164,7 @@
         },
         {
           "codigo": "mathiesen-espana",
-          "nombre": "Mathiesen EspaÃ±a",
+          "nombre": "Mathiesen España",
           "activa": true
         },
         {
@@ -179,7 +179,7 @@
         },
         {
           "codigo": "mathiesen-peru",
-          "nombre": "Mathiesen PerÃº",
+          "nombre": "Mathiesen Perú",
           "activa": true
         },
         {
