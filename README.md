@@ -17,6 +17,8 @@ npm run build
 
 Vite expone las variables `VITE_*` al navegador: nunca poner secretos en ellas. En Vercel configurar `VITE_CANAL_API_URL` con el endpoint HTTPS del backend antes de compilar. La SPA necesita la reescritura de `vercel.json`.
 
+Vercel ejecuta `scripts/build-vercel.mjs`: usa la variable canónica o el origen público revisado de `deployment/production-api.mjs`, sin heredar el alias histórico de Oracle. Una variable canónica explícita insegura o dirigida al destino retirado bloquea el build. Tras publicar, comprobar el bundle y la API real; ver `docs/INCIDENTE_CARGA_20261125.md`.
+
 ## Prueba funcional aislada
 
 Arrancar el arnés `AuditBrowserPreviewTest` del backend en 18081, con H2, correo y archivos simulados. Arrancar Vite en `localhost:5173` apuntando a esa API. Instalar el Chromium de Playwright con `npx playwright install chromium` o definir `CHROME_EXECUTABLE` hacia un Chrome local. Ejecutar:
