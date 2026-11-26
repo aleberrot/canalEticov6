@@ -45,11 +45,11 @@ test('dos denuncias independientes no reutilizan datos ni adjuntos en el transpo
 });
 
 test('la espera de empresa tolera arranque en frío sin superar dos minutos', async () => {
-  const originalTimeout = AbortSignal.timeout;
+  const originalTimeout = globalThis.setTimeout;
   let requestedTimeout;
-  AbortSignal.timeout = (ms) => {
+  globalThis.setTimeout = (callback, ms) => {
     requestedTimeout = ms;
-    return originalTimeout.call(AbortSignal, ms);
+    return originalTimeout(callback, ms);
   };
   try {
     globalThis.fetch = async () => Response.json({ codigo: 'emp-01', nombre: 'Empresa 1', activa: true });
@@ -57,7 +57,7 @@ test('la espera de empresa tolera arranque en frío sin superar dos minutos', as
     assert.ok(requestedTimeout >= 60000, '15 s interrumpe un arranque en frío');
     assert.ok(requestedTimeout <= 120000, 'la espera debe permanecer acotada');
   } finally {
-    AbortSignal.timeout = originalTimeout;
+    globalThis.setTimeout = originalTimeout;
   }
 });
 test('abandonar un canal cancela su consulta pendiente sin reintentos automáticos', async () => {
@@ -74,4 +74,72 @@ test('abandonar un canal cancela su consulta pendiente sin reintentos automátic
   controller.abort();
   await result;
   assert.equal(calls, 1);
+});
+
+test('empresa, sucursales y seguimiento funcionan sin AbortSignal.any ni timeout', async () => {
+  const any = AbortSignal.any;
+  const timeout = AbortSignal.timeout;
+  AbortSignal.any = undefined;
+  AbortSignal.timeout = undefined;
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls++;
+    return Response.json(calls === 2 ? [] : { codigo: 'mathiesen' });
+  };
+  try {
+    await api.obtenerEmpresaPublica('mathiesen', new AbortController().signal);
+    await api.obtenerSucursales('mathiesen', undefined, new AbortController().signal);
+    await api.consultarDenuncia({ code: 'DEN-SINTETICO', password: 'clave-prueba' });
+    await api.guardarSucursal('mathiesen', {codigo:'test',nombre:'Sintética',activa:true}, 'synthetic', true);
+    assert.equal(calls, 4);
+  } finally {
+    AbortSignal.any = any;
+    AbortSignal.timeout = timeout;
+  }
+});
+
+test('la espera cancela también lectura JSON lenta y libera el temporizador', async () => {
+  const originalSet = globalThis.setTimeout;
+  const originalClear = globalThis.clearTimeout;
+  let expire;
+  let cleared = false;
+  let calls = 0;
+  const timer = {};
+  globalThis.setTimeout = callback => { expire = callback; return timer; };
+  globalThis.clearTimeout = value => { assert.equal(value, timer); cleared = true; };
+  globalThis.fetch = async (_url, options) => {
+    calls++;
+    return { ok: true, json: () => new Promise((_resolve, reject) => {
+      options.signal.addEventListener('abort', () => reject(options.signal.reason), {once:true});
+    }) };
+  };
+  try {
+    const pending = api.obtenerEmpresaPublica('mathiesen');
+    await Promise.resolve();
+    expire();
+    await assert.rejects(pending, error => error.name === 'TimeoutError');
+    assert.equal(calls, 1);
+    assert.equal(cleared, true);
+  } finally {
+    globalThis.setTimeout = originalSet;
+    globalThis.clearTimeout = originalClear;
+  }
+});
+
+test('completar o fallar la carga libera temporizador y escucha de navegación', async () => {
+  const originalClear = globalThis.clearTimeout;
+  let cleared = 0;
+  globalThis.clearTimeout = timer => { cleared++; originalClear(timer); };
+  const controller = new AbortController();
+  const originalRemove = controller.signal.removeEventListener.bind(controller.signal);
+  let removed = 0;
+  controller.signal.removeEventListener = (...args) => { removed++; originalRemove(...args); };
+  try {
+    globalThis.fetch = async () => Response.json({codigo:'mathiesen'});
+    await api.obtenerEmpresaPublica('mathiesen', controller.signal);
+    globalThis.fetch = async () => { throw new TypeError('synthetic network failure'); };
+    await assert.rejects(api.obtenerEmpresaPublica('mathiesen', controller.signal), /synthetic network failure/);
+    assert.equal(cleared, 2);
+    assert.equal(removed, 2);
+  } finally { globalThis.clearTimeout = originalClear; }
 });

@@ -1,5 +1,7 @@
 # Reauditoría de las PR contra lo pedido por el cliente
 
+> Registro histórico de candidata local. Para el estado productivo y la corrección posterior a WEBETIKO con K, consultar `AUDITORIA_SITIO_20261125.md`; las afirmaciones de implementación aquí no certifican despliegue.
+
 **Fecha:** 24/11/2026, America/Santiago. **Fuente:** las 20 láminas de `WEBETIKO_OBSERVACIONES_23112026.pptx` y las instrucciones de entrega del usuario. **Resultado:** candidata corregida para revisión; no desplegada.
 
 Se revisaron frontend PR #6, inicialmente `9e73a963841565a81c5420f794f9bfe41d8d6fba`, y backend PR #5, inicialmente `deb573f3da199f4c3b61499a4e1608789d1f1c60`. Las correcciones de esta revisión se agregan a esas mismas PR. No se fusionaron ni se modificó producción.

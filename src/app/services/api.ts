@@ -1,6 +1,24 @@
 export const API_URL = (import.meta.env.VITE_CANAL_API_URL?.trim() || import.meta.env.VITE_API_URL?.trim() || 'http://localhost:8080').replace(/\/+$/, '');
 export const MAX_ARCHIVO_BYTES = 50 * 1024 * 1024;
 
+// Keep cancellation and a bounded wait in browsers without AbortSignal.any/timeout.
+// The timer also covers decoding the response body; no requests are retried here.
+async function requestJson<T>(url: string, options: RequestInit, timeoutMs: number, signal?: AbortSignal): Promise<T> {
+  const controller = new AbortController();
+  const cancel = () => controller.abort(signal?.reason);
+  if (signal?.aborted) cancel();
+  else signal?.addEventListener('abort', cancel, { once: true });
+  const timer = setTimeout(() => controller.abort(new DOMException('Request timed out', 'TimeoutError')), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    if (!response.ok) return await handleError(response);
+    return await response.json() as T;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener('abort', cancel);
+  }
+}
+
 export type TipoDenuncia = 'GENERAL' | 'LEY_KARIN';
 export type RelacionEmpresa =
   | 'TRABAJADOR'
@@ -270,22 +288,15 @@ export async function crearDenuncia(
 export async function consultarDenuncia(
   data: SeguimientoRequest,
 ): Promise<SeguimientoDenunciaResponse> {
-  const response = await fetch(`${API_URL}/api/denuncias/seguimiento`, {
+  return requestJson<SeguimientoDenunciaResponse>(`${API_URL}/api/denuncias/seguimiento`, {
     method: 'POST',
     credentials: 'omit',
     redirect: 'error',
-    signal: AbortSignal.timeout(15000),
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    return handleError(response);
-  }
-
-  return response.json() as Promise<SeguimientoDenunciaResponse>;
+  }, 15000);
 }
 
 export async function agregarInformacionAdicional(
@@ -351,16 +362,10 @@ export async function obtenerEmpresaPublica(
   codigo: string,
   signal?: AbortSignal,
 ): Promise<EmpresaPublicResponse> {
-  const response = await fetch(
+  return requestJson<EmpresaPublicResponse>(
     `${API_URL}/api/empresas/${encodeURIComponent(codigo)}`,
-    { signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(90000)]) : AbortSignal.timeout(90000), credentials: 'omit', redirect: 'error' },
+    { credentials: 'omit', redirect: 'error' }, 90000, signal,
   );
-
-  if (!response.ok) {
-    return handleError(response);
-  }
-
-  return response.json() as Promise<EmpresaPublicResponse>;
 }
 
 export async function obtenerDenunciasPorEmpresa(
@@ -501,20 +506,15 @@ export async function descargarAporte(
 
 export interface Sucursal { codigo: string; nombre: string; activa: boolean }
 export async function obtenerSucursales(empresa: string, credentials?: string, signal?: AbortSignal): Promise<Sucursal[]> {
-  const response = await fetch(`${API_URL}/api/${credentials ? 'admin/' : ''}empresas/${encodeURIComponent(empresa)}/sucursales`, {
+  const data = await requestJson<Sucursal[]>(`${API_URL}/api/${credentials ? 'admin/' : ''}empresas/${encodeURIComponent(empresa)}/sucursales`, {
     headers: credentials ? basicAuth(credentials) : undefined, credentials: 'omit', redirect: 'error',
-    signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(90000)]) : AbortSignal.timeout(90000),
-  });
-  if (!response.ok) return handleError(response);
-  const data = await response.json();
+  }, 90000, signal);
   if (!Array.isArray(data) || data.some(s => typeof s.codigo !== 'string' || typeof s.nombre !== 'string' || typeof s.activa !== 'boolean')) throw new ApiError('Respuesta de sucursales inválida', 502);
   return data;
 }
 export async function guardarSucursal(empresa: string, sucursal: Sucursal, credentials: string, crear: boolean): Promise<Sucursal> {
-  const response = await fetch(`${API_URL}/api/admin/empresas/${encodeURIComponent(empresa)}/sucursales${crear ? '' : '/' + encodeURIComponent(sucursal.codigo)}`, {
+  return requestJson<Sucursal>(`${API_URL}/api/admin/empresas/${encodeURIComponent(empresa)}/sucursales${crear ? '' : '/' + encodeURIComponent(sucursal.codigo)}`, {
     method: crear ? 'POST' : 'PUT', headers: {...basicAuth(credentials), 'Content-Type': 'application/json'},
-    body: JSON.stringify(sucursal), credentials: 'omit', redirect: 'error', signal: AbortSignal.timeout(30000),
-  });
-  if (!response.ok) return handleError(response);
-  return response.json();
+    body: JSON.stringify(sucursal), credentials: 'omit', redirect: 'error',
+  }, 30000);
 }

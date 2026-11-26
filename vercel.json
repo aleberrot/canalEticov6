@@ -13,7 +13,8 @@
       "fix-emp01-startup-20261121": false,
       "feat-sucursales-ppt-20261122": false,
       "fix-audit-ui-20261123": false,
-      "fix-production-api-20261125": false
+      "fix-production-api-20261125": false,
+      "fix-webetiko-name-compat-20261125": false
     }
   },
   "buildCommand": "node scripts/build-vercel.mjs"

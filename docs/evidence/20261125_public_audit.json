@@ -1,0 +1,232 @@
+{
+  "pages": {
+    "observedUTC": "2026-11-26T02:08:45.024Z",
+    "checks": [
+      {
+        "page": "Mathiesen",
+        "seconds": 9.34,
+        "heading": "WEBETICO",
+        "logos": [
+          {
+            "alt": "Logo de Grupo Mathiesen",
+            "loaded": true
+          },
+          {
+            "alt": "WEBETIKO â€” Grupo Conthrol Tech",
+            "loaded": true
+          }
+        ],
+        "links": [
+          {
+            "text": "Enviar denuncia generalPermite omitir tus datos personales",
+            "href": "/canal/mathiesen/denuncia"
+          },
+          {
+            "text": "Enviar denuncia por Ley KarinRequiere identificaciÃ³n del denunciante",
+            "href": "/canal/mathiesen/denuncia-ley-karin"
+          },
+          {
+            "text": "Consultar denunciaUsa tu cÃ³digo y contraseÃ±a de seguimiento",
+            "href": "/tracking?empresa=mathiesen"
+          },
+          {
+            "text": "Acceso administrativo",
+            "href": "/admin?empresa=mathiesen"
+          }
+        ]
+      },
+      {
+        "page": "Mathiesen mÃ³vil 375px",
+        "overflow": false
+      },
+      {
+        "page": "/canal/mathiesen/denuncia",
+        "termsRequired": true,
+        "overflow": false
+      },
+      {
+        "page": "/canal/mathiesen/denuncia-ley-karin",
+        "termsRequired": true,
+        "overflow": false
+      },
+      {
+        "page": "Seguimiento",
+        "url": "https://canaletico.absoftwareworks.com/tracking?empresa=mathiesen",
+        "passwordEmpty": true,
+        "body": "Inicio\nConsultar Denuncia\n\nVerifica el estado de tu reporte\n\nCÃ³digo de denuncia\nContraseÃ±a\nConsultar estado\n\nNota: Necesitas el cÃ³digo de seguimiento que recibiste al enviar tu denuncia y la contraseÃ±a que creaste en ese momento."
+      },
+      {
+        "page": "AdministraciÃ³n",
+        "url": "https://canaletico.absoftwareworks.com/admin?empresa=mathiesen",
+        "passwordEmpty": true,
+        "body": "Inicio\nPanel Administrativo\nUsuario\nContraseÃ±a\nIniciar sesiÃ³n"
+      }
+    ],
+    "errors": [],
+    "noProductionSubmissions": true
+  },
+  "contract": [
+    {
+      "path": "/v3/api-docs",
+      "status": 200,
+      "seconds": 18.51,
+      "schemas": {
+        "CrearDenunciaResponse": [
+          "codigo",
+          "tipo",
+          "descripcion",
+          "estado",
+          "fechaCreacion"
+        ],
+        "AporteDenunciaResponse": [
+          "id",
+          "informacion",
+          "nombreArchivo",
+          "tieneArchivo",
+          "createdAt",
+          "legacy"
+        ],
+        "SeguimientoDenunciaResponse": [
+          "codigoUnico",
+          "tipoDenuncia",
+          "delitoTipificacion",
+          "estado",
+          "descripcion",
+          "informacionAdicional",
+          "conclusionesMedidas",
+          "createdAt",
+          "updatedAt",
+          "fechaIncidente",
+          "aportes",
+          "empresa",
+          "sucursalNombre"
+        ],
+        "SeguimientoRequest": [
+          "codigo",
+          "password"
+        ]
+      },
+      "operations": {
+        "/api/denuncias/{codigo}/informacion-adicional": {
+          "post": null
+        }
+      }
+    },
+    {
+      "path": "/api/empresas/mathiesen/sucursales",
+      "status": 200,
+      "seconds": 8.1,
+      "branches": [
+        {
+          "codigo": "agrovet",
+          "nombre": "Agrovet",
+          "activa": true
+        },
+        {
+          "codigo": "empresa-argentina-cdv",
+          "nombre": "Empresa Argentina CDV S.A.",
+          "activa": true
+        },
+        {
+          "codigo": "luval",
+          "nombre": "Luval",
+          "activa": true
+        },
+        {
+          "codigo": "mathiesen-argentina",
+          "nombre": "Mathiesen Argentina",
+          "activa": true
+        },
+        {
+          "codigo": "mathiesen-bolivia",
+          "nombre": "Mathiesen Bolivia",
+          "activa": true
+        },
+        {
+          "codigo": "mathiesen-brasil",
+          "nombre": "Mathiesen Brasil",
+          "activa": true
+        },
+        {
+          "codigo": "mathiesen-cam",
+          "nombre": "Mathiesen CAM",
+          "activa": true
+        },
+        {
+          "codigo": "mathiesen-chile",
+          "nombre": "Mathiesen Chile",
+          "activa": true
+        },
+        {
+          "codigo": "mathiesen-colombia",
+          "nombre": "Mathiesen Colombia",
+          "activa": true
+        },
+        {
+          "codigo": "mathiesen-espana",
+          "nombre": "Mathiesen EspaÃ±a",
+          "activa": true
+        },
+        {
+          "codigo": "mathiesen-mexico",
+          "nombre": "Mathiesen Mexico",
+          "activa": true
+        },
+        {
+          "codigo": "mathiesen-paraguay",
+          "nombre": "Mathiesen Paraguay",
+          "activa": true
+        },
+        {
+          "codigo": "mathiesen-peru",
+          "nombre": "Mathiesen PerÃº",
+          "activa": true
+        },
+        {
+          "codigo": "mathiesen-uruguay",
+          "nombre": "Mathiesen Uruguay",
+          "activa": true
+        },
+        {
+          "codigo": "quimatic",
+          "nombre": "Quimatic",
+          "activa": true
+        },
+        {
+          "codigo": "sercoin",
+          "nombre": "Sercoin",
+          "activa": true
+        },
+        {
+          "codigo": "soolimpex",
+          "nombre": "Soolimpex",
+          "activa": true
+        }
+      ]
+    },
+    {
+      "path": "/api/empresas/emp-01",
+      "status": 200,
+      "seconds": 7.9,
+      "company": {
+        "codigo": "emp-01",
+        "nombre": "Empresa 1",
+        "logo": "/empresas/emp-01/logo.webp",
+        "banner": "/empresas/emp-01/banner.webp",
+        "activa": true
+      }
+    },
+    {
+      "path": "/api/empresas/emp-02",
+      "status": 200,
+      "seconds": 7.9,
+      "company": {
+        "codigo": "emp-02",
+        "nombre": "Empresa 2",
+        "logo": null,
+        "banner": null,
+        "activa": true
+      }
+    }
+  ]
+}
