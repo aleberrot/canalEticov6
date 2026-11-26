@@ -1,3 +1,6 @@
+import { formatBusinessDate } from '../services/businessTime';
+import { channelHome, trackingRoute } from '../services/navigation';
+import { WebetikoBrand } from '../components/WebetikoBrand';
 import { ClientLogo } from '../components/ClientLogo';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -34,6 +37,7 @@ function ReportStatusSession() {
   const { code } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const company = new URLSearchParams(location.search).get('empresa');
   const password = (location.state as TrackingLocationState | null)?.password;
   const [report, setReport] =
     useState<SeguimientoDenunciaResponse | null>(null);
@@ -49,7 +53,7 @@ function ReportStatusSession() {
   useEffect(() => {
     let active = true;
     if (!code || !password) {
-      navigate('/tracking', { replace: true });
+      navigate(trackingRoute(company), { replace: true });
       return;
     }
 
@@ -73,7 +77,7 @@ function ReportStatusSession() {
 
     void fetchReport();
     return () => { active = false; };
-  }, [code, navigate, password]);
+  }, [code, navigate, password, company]);
 
   const sendAdditionalInformation = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -139,7 +143,7 @@ function ReportStatusSession() {
               </div>
             </div>
             <Link
-              to="/tracking"
+              to={trackingRoute(report?.empresa?.codigo || company)}
               className="block w-full rounded-lg bg-primary px-6 py-3 text-center text-primary-foreground"
             >
               Volver a consulta
@@ -154,14 +158,15 @@ function ReportStatusSession() {
     <div className="app-surface py-8 sm:py-12">
       <div className="container mx-auto max-w-3xl px-4">
         <Link
-          to="/tracking"
+          to={trackingRoute(report?.empresa?.codigo || company)}
           className="mb-8 inline-flex items-center gap-2 text-primary hover:underline"
         >
           <ArrowLeft className="h-4 w-4" /> Volver a consulta
         </Link>
         <div className="report-card rounded-lg bg-white p-8">
+          <Link className="mb-5 inline-block text-primary underline" to={channelHome(report.empresa?.codigo)}>Inicio</Link>
           <ReportDetails report={report} password={password!} />
-          {report.tipoDenuncia === 'GENERAL' && (
+          {(report.tipoDenuncia === 'GENERAL' || report.tipoDenuncia === 'LEY_KARIN') && (
             <form
               onSubmit={sendAdditionalInformation}
               className="mt-8 space-y-4 border-t border-border pt-8"
@@ -288,6 +293,7 @@ export function ReportDetails({ report, password }: {
 }) {
   return (
     <>
+      <WebetikoBrand compact className="mb-4" />
       {report.empresa && <ClientLogo empresa={report.empresa} className="mb-6" />}
           <header className="mb-6 flex flex-wrap gap-3 items-start justify-between border-b border-border pb-6">
             <div>
@@ -306,11 +312,7 @@ export function ReportDetails({ report, password }: {
             <InfoRow
               icon={<Calendar className="mt-1 h-5 w-5 text-primary" />}
               label="Fecha de creación"
-              value={new Date(`${report.createdAt}T00:00:00`).toLocaleDateString('es-CL', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
+              value={formatBusinessDate(report.createdAt, report.createdAtInstant)}
             />
             <InfoRow
               icon={<FileText className="mt-1 h-5 w-5 text-primary" />}

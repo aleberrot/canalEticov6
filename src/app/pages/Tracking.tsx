@@ -1,11 +1,14 @@
+import { channelHome } from '../services/navigation';
 import { WebetikoBrand } from '../components/WebetikoBrand';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import { ArrowLeft, Search, Loader2, AlertCircle } from 'lucide-react';
 import { consultarDenuncia } from '../services/api';
 
 export function Tracking() {
   const navigate = useNavigate();
+  const [search] = useSearchParams();
+  const company = search.get('empresa');
   const [formData, setFormData] = useState({
     codigo: '',
     password: ''
@@ -21,13 +24,13 @@ export function Tracking() {
 
     try {
       // Call API to verify and get report
-      await consultarDenuncia({
+      const report = await consultarDenuncia({
         code: formData.codigo.trim(),
         password: formData.password
       });
 
       // If successful, navigate to status page
-      navigate(`/status/${encodeURIComponent(formData.codigo.trim())}`, {
+      navigate(`/status/${encodeURIComponent(formData.codigo.trim())}?empresa=${encodeURIComponent(report.empresa?.codigo || company || 'mathiesen')}`, {
         state: { password: formData.password }
       });
     } catch (err) {
@@ -46,11 +49,11 @@ export function Tracking() {
     <div className="app-surface py-8 sm:py-12">
       <div className="container mx-auto px-4 max-w-2xl">
         <Link 
-          to="/"
+          to={channelHome(company)}
           className="inline-flex items-center gap-2 text-primary hover:underline mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
-          Volver al inicio
+          Inicio
         </Link>
         
         <div className="app-card report-card">

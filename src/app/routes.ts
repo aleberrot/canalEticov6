@@ -1,3 +1,6 @@
+import { createElement } from 'react';
+import { Navigate } from 'react-router';
+import { channelHome } from './services/navigation';
 import { createBrowserRouter } from 'react-router';
 import { Landing } from './pages/Landing';
 import { SubmitReport, SubmitLeyKarinReport } from './pages/SubmitReport';
@@ -6,7 +9,7 @@ import { PublicChannelLayout } from './layouts/PublicChannelLayout';
 export const router = createBrowserRouter([
   {
     path: '/',
-    Component: Landing,
+    Component: () => createElement(Navigate, {to: channelHome(), replace: true}),
   },
   {
     path: '/tracking',

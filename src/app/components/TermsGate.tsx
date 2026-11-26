@@ -1,3 +1,4 @@
+import { WebetikoBrand } from './WebetikoBrand';
 import { ClientLogo } from './ClientLogo';
 import { useState } from 'react';
 import { Link } from 'react-router';
@@ -15,10 +16,10 @@ export function TermsGate({ tipoDenuncia, onAccept }: {
       <div className="mx-auto max-w-3xl space-y-6 app-card report-card">
         <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-4">
-        <Link to={`/canal/${empresa.codigo}`} className="text-primary underline">Volver al inicio</Link>
+        <Link to={`/canal/${empresa.codigo}`} className="text-primary underline">Inicio</Link>
         <h1 className="text-2xl text-primary">{tipoDenuncia === 'GENERAL' ? 'Enviar denuncia general' : 'Enviar denuncia por Ley Karin'}</h1>
           </div>
-          <ClientLogo empresa={empresa} compact />
+          <WebetikoBrand compact className="mb-4" /><ClientLogo empresa={empresa} compact />
         </header>
         <p>{empresa.nombre}</p>
         <p className="legal-intro">{CHANNEL_INTRO.replaceAll('{empresa}', empresa.nombre)}</p>

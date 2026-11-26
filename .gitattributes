@@ -1,0 +1,8 @@
+*.zip export-ignore
+dist/ export-ignore
+cambios/ export-ignore
+*.xlsx export-ignore
+*.log export-ignore
+.env* export-ignore
+.env.example -export-ignore
+test-artifacts/ export-ignore

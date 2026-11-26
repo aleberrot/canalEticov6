@@ -2,7 +2,7 @@
 .channel-header{background:white;border-bottom:1px solid #e5e9f1}
 .channel-header-inner{max-width:1120px;margin:auto;padding:22px 28px;display:flex;align-items:center;justify-content:space-between;gap:32px}
 .channel-header-inner>div{margin:0}.channel-header-inner [data-company-brand]{max-width:216px}.channel-header-inner .webetiko-brand{max-width:218px}
-.webetiko-horizontal{aspect-ratio:5/1;overflow:hidden}.webetiko-horizontal img{width:100%;height:100%;object-fit:cover;object-position:center}
+.webetiko-horizontal{aspect-ratio:2048/683;overflow:hidden}.webetiko-horizontal img{width:100%;height:100%;object-fit:contain;object-position:center}
 .channel-banner{display:block;width:100%;max-height:190px;object-fit:cover}.channel-main{width:min(1120px,100%);margin:auto;padding:40px 28px 24px}
 .channel-title{margin-bottom:28px}.channel-title h1{color:#24365d;font-size:clamp(2rem,4vw,2.7rem);font-weight:700;line-height:1.2;letter-spacing:-.035em;margin:14px 0 8px}.channel-title>p{color:#526179;font-size:1.1rem}
 .privacy-badge{display:inline-flex;align-items:center;gap:7px;color:#3d6557;background:#e6f1eb;border:1px solid #d2e5d9;border-radius:100px;padding:6px 11px;font-size:.78rem;font-weight:600}
