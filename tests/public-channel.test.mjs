@@ -37,6 +37,8 @@ test('flujos separados, términos obligatorios y trazabilidad pública', async (
     });
     await t.test('landing muestra general y luego Ley Karin', () => {
       const landing = renderPage('/');
+      assert.match(landing, /<h1>WEBETIKO<\/h1>/);
+      assert.doesNotMatch(landing, /WEBETICO/);
       assert.ok(landing.indexOf('Enviar denuncia general') < landing.indexOf('Enviar denuncia por Ley Karin'));
       assert.match(landing, /\/canal\/emp-test\/denuncia-ley-karin/);
     });

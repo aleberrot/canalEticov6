@@ -11,7 +11,7 @@ const output=__dirname+'/../test-artifacts';
  async function noOverflow(label){assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth),label);cases.push(label);}
  try {
   await page.goto(base+'/');await page.waitForURL('**/canal/mathiesen');
-  await page.getByRole('heading',{name:'WEBETICO',exact:true}).waitFor();
+  await page.getByRole('heading',{name:'WEBETIKO',exact:true}).waitFor();
   assert.equal(await page.getByRole('img',{name:'WEBETIKO — Grupo Conthrol Tech',exact:true}).getAttribute('src'),'/marca/webetiko-2026.webp');
   await page.screenshot({path:output+'/home-desktop.jpg',fullPage:true});await noOverflow('Portada escritorio sin desbordamiento');
   const codes=[];
@@ -80,7 +80,7 @@ const output=__dirname+'/../test-artifacts';
   await page.reload();await page.getByRole('link',{name:'Inicio',exact:true}).click();await page.waitForURL('**/canal/emp-02');
   await page.goBack();await page.getByRole('heading',{name:'Consultar Denuncia'}).waitFor();await page.goForward();await page.waitForURL('**/canal/emp-02');
   cases.push('Empresa 2: consulta, recarga, historial e Inicio preservan contexto');
-  await page.goto(base+'/canal/mathiesen');await page.getByRole('heading',{name:'WEBETICO',exact:true}).waitFor();await page.screenshot({path:output+'/home-mobile.jpg',fullPage:true});
+  await page.goto(base+'/canal/mathiesen');await page.getByRole('heading',{name:'WEBETIKO',exact:true}).waitFor();await page.screenshot({path:output+'/home-mobile.jpg',fullPage:true});
   await page.getByRole('link',{name:/Enviar denuncia por Ley Karin/}).click();await page.getByRole('checkbox').check();await page.getByRole('button',{name:'Continuar al formulario'}).click();
   await page.getByRole('combobox',{name:/Dónde ocurrió/}).selectOption('mathiesen-peru');await noOverflow('Formulario Karin móvil sin desbordamiento');
   assert.equal(await page.getByLabel('Teléfono',{exact:true}).inputValue(),'');await page.screenshot({path:output+'/form-mobile.jpg',fullPage:true});

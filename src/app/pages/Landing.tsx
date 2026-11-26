@@ -12,14 +12,14 @@ export function Landing() {
   const base = empresa ? '/canal/' + empresa.codigo : '';
   return <div className="app-surface">
     <header className="channel-header"><div className="channel-header-inner">
-      {empresa?.logo ? <ClientLogo empresa={empresa} compact /> : <span className="platform-label">WEBETICO</span>}
+      {empresa?.logo ? <ClientLogo empresa={empresa} compact /> : <span className="platform-label">WEBETIKO</span>}
       <WebetikoBrand compact />
     </div></header>
     {empresa?.banner && <img src={empresa.banner} alt={'Banner de ' + empresa.nombre} className="channel-banner" />}
     <main className="channel-main">
       <div className="channel-title">
         <span className="privacy-badge"><ShieldCheck size={16} aria-hidden="true" /> Comunicación confidencial</span>
-        <h1>WEBETICO</h1><p>Canal de Denuncias</p>{empresa && <p className="text-sm">{empresa.nombre}</p>}
+        <h1>WEBETIKO</h1><p>Canal de Denuncias</p>{empresa && <p className="text-sm">{empresa.nombre}</p>}
       </div>
       <div className="channel-grid">
         <section className="app-card channel-intro" aria-label="Acerca del canal">
