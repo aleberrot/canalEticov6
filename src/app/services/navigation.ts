@@ -11,3 +11,7 @@ export function adminRoute(code?: string | null): string {
   const home = channelHome(code);
   return '/admin?empresa=' + home.slice('/canal/'.length);
 }
+export function adminDashboardRoute(code?: string | null): string {
+  const home = channelHome(code);
+  return '/admin/dashboard?empresa=' + home.slice('/canal/'.length);
+}
