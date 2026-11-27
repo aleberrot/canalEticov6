@@ -44,7 +44,7 @@ const output=__dirname+'/../test-artifacts';
    await page.getByRole('button',{name:'Consultar estado',exact:true}).click();
    await page.getByRole('heading',{name:'Estado de Denuncia'}).waitFor();
    assert.match(await page.locator('body').innerText(),/23-11-2026.*21:30:00/);
-   for(let i=1;i<=2;i++){
+   for(let i=1;i<=3;i++){
     await page.getByLabel('Información adicional',{exact:true}).fill('Aporte sintético '+i+' de '+kind);
     if(i===1)await page.locator('input[type=file]').setInputFiles({name:'contribution.txt',mimeType:'text/plain',buffer:Buffer.from('synthetic contribution bytes')});
     await page.getByRole('button',{name:'Enviar información adicional',exact:true}).click();
@@ -57,7 +57,7 @@ const output=__dirname+'/../test-artifacts';
    const download=await downloadPromise;const bytes=await fs.readFile(await download.path());assert.equal(bytes.toString(),'synthetic contribution bytes');
    await page.screenshot({path:output+'/tracking-'+kind+'.jpg',fullPage:true});
    await page.getByRole('link',{name:'Inicio',exact:true}).click();await page.waitForURL('**/canal/mathiesen');
-   cases.push(kind+': creación, fecha Chile, 17 sucursales, dos aportes y descarga autenticada');
+   cases.push(kind+': creación, fecha Chile, 17 sucursales, tres aportes y descarga autenticada');
   }
   assert.notEqual(codes[0],codes[1]);
   await page.goto(base+'/admin?empresa=mathiesen');await page.getByLabel('Usuario',{exact:true}).fill('admin');await page.getByLabel('Contraseña',{exact:true}).fill('integration-only');
