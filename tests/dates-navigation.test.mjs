@@ -26,4 +26,7 @@ test('Inicio conserva empresa e impide destinos externos inyectados',()=>{
  assert.equal(nav.trackingRoute('emp-01'),'/tracking?empresa=emp-01');
  assert.equal(nav.channelHome('https://evil.invalid'),'/canal/mathiesen');
  assert.equal(nav.adminRoute('mathiesen'),'/admin?empresa=mathiesen');
+ assert.equal(nav.adminDashboardRoute('mathiesen'),'/admin/dashboard?empresa=mathiesen');
+ assert.equal(nav.adminDashboardRoute('emp-02'),'/admin/dashboard?empresa=emp-02');
+ assert.equal(nav.adminDashboardRoute('https://evil.invalid'),'/admin/dashboard?empresa=mathiesen');
 });

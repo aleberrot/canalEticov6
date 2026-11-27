@@ -1,4 +1,4 @@
-import { channelHome } from '../services/navigation';
+import { adminDashboardRoute, channelHome } from '../services/navigation';
 import { WebetikoBrand } from '../components/WebetikoBrand';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
@@ -32,7 +32,7 @@ export function AdminLogin() {
     try {
       await obtenerEmpresas(credentials);
       localStorage.setItem('adminCredentials', credentials);
-      navigate('/admin/dashboard', { replace: true });
+      navigate(adminDashboardRoute(company), { replace: true });
     } catch (requestError) {
       localStorage.removeItem('adminCredentials');
       setError(

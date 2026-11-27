@@ -25,7 +25,14 @@ const branches=[{codigo:'mathiesen-chile',nombre:'Mathiesen Chile',activa:true}]
    if(legacy)await context.addInitScript(()=>{AbortSignal.any=undefined;AbortSignal.timeout=undefined;});
    const errors=[];const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
    let fail=false;
-   await page.route('**/api/**',route=>route.fulfill({status:fail?503:200,contentType:'application/json',body:JSON.stringify(route.request().url().endsWith('/sucursales')?branches:company)}));
+   await page.route('**/api/**',route=>{
+    const url=route.request().url();
+    const data=url.endsWith('/sucursales')?branches:
+     url.endsWith('/api/admin/empresas')?[{codigo:'emp-01',nombre:'Empresa de ejemplo',activa:true},company]:
+     url.endsWith('/denuncias')?[]:
+     url.endsWith('/estadisticas')?{total:0,general:0,leyKarin:0,recibidas:0,enRevision:0,cerradas:0}:company;
+    return route.fulfill({status:fail?503:200,contentType:'application/json',body:JSON.stringify(data)});
+   });
    const base='http://127.0.0.1:'+server.address().port;
    await page.goto(base+'/canal/mathiesen');
    await page.getByRole('heading',{name:'WEBETIKO',exact:true}).waitFor();
@@ -44,12 +51,20 @@ const branches=[{codigo:'mathiesen-chile',nombre:'Mathiesen Chile',activa:true}]
     await page.goto(base+'/canal/mathiesen');
     await page.getByRole('heading',{name:'WEBETIKO',exact:true}).waitFor();
    }
-   fail=true;await page.reload();
+   await page.goto(base+'/admin?empresa=mathiesen');
+   await page.getByLabel('Usuario',{exact:true}).fill('synthetic-admin');
+   await page.getByLabel('Contraseña',{exact:true}).fill('synthetic-password');
+   await page.getByRole('button',{name:'Iniciar sesión',exact:true}).click();
+   await page.getByRole('combobox').first().waitFor();
+   assert.equal(await page.getByRole('combobox').first().inputValue(),'mathiesen','Login debe conservar Mathiesen aunque emp-01 venga primero');
+   assert.equal(new URL(page.url()).searchParams.get('empresa'),'mathiesen');
+   assert.equal(await page.getByRole('link',{name:'Inicio',exact:true}).getAttribute('href'),'/canal/mathiesen');
+   fail=true;await page.goto(base+'/canal/mathiesen');
    await page.getByRole('heading',{name:'Canal no disponible',exact:true}).waitFor();
    fail=false;await page.getByRole('button',{name:'Volver a intentar'}).click();
    await page.getByRole('heading',{name:'WEBETIKO',exact:true}).waitFor();
    assert.deepEqual(errors,[]);
-   cases.push({browser:legacy?'sin AbortSignal.any/timeout, 375px':'actual, 1280px',checks:['WEBETIKO','General y Karin','sucursal seleccionable','contraseña vacía','sin desborde','recuperación 503'],passed:true});
+   cases.push({browser:legacy?'sin AbortSignal.any/timeout, 375px':'actual, 1280px',checks:['WEBETIKO','General y Karin','sucursal seleccionable','contraseña vacía','sin desborde','login conserva empresa con catálogo reordenado','recuperación 503'],passed:true});
    await context.close();
   }
   console.log(JSON.stringify({passed:true,cases}));
